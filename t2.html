@@ -1,0 +1,524 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Toán Lớp 2 - Tổng hợp Phép Cộng và Phép Trừ</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Sử dụng font Inter theo hướng dẫn */
+        }
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            justify-items: center;
+        }
+        .problem-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1.5rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .number {
+            text-align: right;
+            width: 4rem;
+            padding-right: 0.5rem;
+        }
+        .line {
+            border-bottom: 2px solid #333;
+            width: 100%;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .input-group {
+            display: flex;
+            margin-top: 0.5rem;
+        }
+        .answer-input {
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 0.5rem; /* Góc bo tròn */
+            margin: 0 0.25rem;
+        }
+        .result-icon {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .exercise-button {
+            @apply flex flex-col items-center justify-center p-4 rounded-lg shadow-md transition duration-300 ease-in-out text-white font-bold text-lg;
+            min-width: 120px;
+            min-height: 100px;
+        }
+               /* Nút game */
+.btn {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    background: #4CAF50;
+    box-shadow: 0 8px #999;
+}
+
+.btn:active {
+    box-shadow: 0 3px #666;
+    transform: translateY(5px);
+}
+
+.btn:hover {
+    filter: brightness(1.1);
+}
+    </style>
+</head>
+<body class="bg-gradient-to-r from-blue-400 to-purple-500 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-4xl text-center">
+    <a href="index.html" class="btn">🏠 Quay lại Trang Chủ</a>
+        <h1 class="text-4xl font-bold text-gray-800 mb-6">Học Toán Lớp 2</h1>
+        <h2 class="text-3xl font-semibold text-blue-600 mb-8">Tổng hợp Phép Cộng và Phép Trừ Trong Phạm Vi 100</h2>
+
+        <div id="homepage-view" class="hidden">
+            <h3 class="text-2xl font-bold text-gray-700 mb-6">Chọn bài tập</h3>
+            <div id="exercise-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-center">
+                </div>
+            <button id="clear-scores-btn" class="mt-8 bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out">
+                Xóa tất cả điểm
+            </button>
+        </div>
+
+        <div id="exercise-view" class="hidden">
+            <div id="exercise-container">
+                </div>
+
+            <div id="navigation-buttons" class="mt-8 flex justify-center space-x-4">
+                <button id="prev-exercise-btn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out hidden">
+                    Bài Trước
+                </button>
+                <button id="next-exercise-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out hidden">
+                    Bài Tiếp Theo
+                </button>
+            </div>
+
+            <button id="back-to-home-btn" class="mt-8 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out">
+                Quay lại Trang Chủ
+            </button>
+        </div>
+
+        <div id="final-message" class="mt-12 text-2xl font-bold text-green-700 hidden">
+            Chúc mừng bạn đã hoàn thành tất cả các bài tập!
+        </div>
+    </div>
+
+    <!-- Modal for Clear Scores Confirmation -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+            <p class="text-xl font-semibold mb-4">Bạn có chắc chắn muốn xóa tất cả điểm?</p>
+            <p class="mb-6">Nhập '000' để xác nhận:</p>
+            <input type="text" id="confirmation-input" class="border border-gray-300 p-2 rounded-md text-center text-lg w-32 mb-6">
+            <div class="flex justify-center space-x-4">
+                <button id="confirm-clear-btn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+                    Xác nhận
+                </button>
+                <button id="cancel-clear-btn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">
+                    Hủy
+                </button>
+            </div>
+            <p id="modal-message" class="mt-4 text-red-600 hidden"></p>
+        </div>
+    </div>
+
+    <script>
+        const NUM_EXERCISES = 1000;
+        const QUESTIONS_PER_EXERCISE = 10;
+
+        let currentExerciseIndex = 0;
+        let exercisesData = []; // Để lưu trữ các số cho mỗi bài toán
+        let scores = {}; // Lưu trữ điểm cho mỗi bài tập, ví dụ: { 'exercise_0': '8/10' }
+
+        // Các phần tử DOM
+        const homepageView = document.getElementById('homepage-view');
+        const exerciseView = document.getElementById('exercise-view');
+        const exerciseList = document.getElementById('exercise-list');
+        const exerciseContainer = document.getElementById('exercise-container');
+        const prevExerciseBtn = document.getElementById('prev-exercise-btn');
+        const nextExerciseBtn = document.getElementById('next-exercise-btn');
+        const backToHomeBtn = document.getElementById('back-to-home-btn');
+        const finalMessage = document.getElementById('final-message');
+        const clearScoresBtn = document.getElementById('clear-scores-btn');
+
+        // DOM elements for modal
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmationInput = document.getElementById('confirmation-input');
+        const confirmClearBtn = document.getElementById('confirm-clear-btn');
+        const cancelClearBtn = document.getElementById('cancel-clear-btn');
+        const modalMessage = document.getElementById('modal-message');
+
+
+        // Hàm tạo số nguyên ngẫu nhiên trong một phạm vi
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Hàm tạo một bài toán cộng có nhớ trong phạm vi 100
+        function generateAdditionProblemWithCarry() {
+            let num1, num2, sum;
+            do {
+                num1 = getRandomInt(10, 89); // Đảm bảo num1 và num2 là số có 2 chữ số
+                num2 = getRandomInt(10, 89);
+
+                const units1 = num1 % 10;
+                const units2 = num2 % 10;
+
+                // Đảm bảo tổng hàng đơn vị >= 10 để có nhớ
+                if ((units1 + units2) >= 10) {
+                    sum = num1 + num2;
+                    // Đảm bảo tổng <= 99
+                    if (sum <= 99) {
+                        return { num1, num2, sum, type: 'addition' };
+                    }
+                }
+            } while (true); // Lặp lại cho đến khi tạo được bài toán hợp lệ
+        }
+
+        // Hàm tạo một bài toán cộng không nhớ trong phạm vi 100
+        function generateAdditionProblemNoCarry() {
+            let num1, num2, sum;
+            do {
+                num1 = getRandomInt(10, 89); // Đảm bảo num1 và num2 là số có 2 chữ số
+                num2 = getRandomInt(10, 89);
+
+                const units1 = num1 % 10;
+                const units2 = num2 % 10;
+
+                // Đảm bảo tổng hàng đơn vị < 10 để không có nhớ
+                if ((units1 + units2) < 10) {
+                    sum = num1 + num2;
+                    // Đảm bảo tổng <= 99
+                    if (sum <= 99) {
+                        return { num1, num2, sum, type: 'addition' };
+                    }
+                }
+            } while (true); // Lặp lại cho đến khi tạo được bài toán hợp lệ
+        }
+
+        // Hàm tạo một bài toán trừ có nhớ trong phạm vi 100
+        function generateSubtractionProblemWithBorrow() {
+            let num1, num2, difference;
+            do {
+                num1 = getRandomInt(20, 99); // Số bị trừ từ 20 đến 99
+                num2 = getRandomInt(10, num1 - 1); // Số trừ nhỏ hơn số bị trừ và là số có 2 chữ số
+
+                const units1 = num1 % 10;
+                const units2 = num2 % 10;
+
+                // Đảm bảo hàng đơn vị của số bị trừ nhỏ hơn hàng đơn vị của số trừ để có nhớ
+                if (units1 < units2) {
+                    difference = num1 - num2;
+                    // Đảm bảo hiệu là số dương và cả hai số đều là 2 chữ số
+                    if (difference >= 0 && num1 >= 10 && num2 >= 10) {
+                        return { num1, num2, difference, type: 'subtraction' };
+                    }
+                }
+            } while (true); // Lặp lại cho đến khi tạo được bài toán hợp lệ
+        }
+
+        // Hàm tạo một bài toán trừ không nhớ trong phạm vi 100
+        function generateSubtractionProblemNoBorrow() {
+            let num1, num2, difference;
+            do {
+                num1 = getRandomInt(20, 99); // Số bị trừ từ 20 đến 99
+                num2 = getRandomInt(10, num1 - 1); // Số trừ nhỏ hơn số bị trừ và là số có 2 chữ số
+
+                const units1 = num1 % 10;
+                const units2 = num2 % 10;
+                const tens1 = Math.floor(num1 / 10);
+                const tens2 = Math.floor(num2 / 10);
+
+                // Đảm bảo không cần nhớ ở cả hàng đơn vị và hàng chục
+                if (units1 >= units2 && tens1 >= tens2) {
+                    difference = num1 - num2;
+                    // Đảm bảo hiệu là số dương và cả hai số đều là 2 chữ số
+                    if (difference >= 0 && num1 >= 10 && num2 >= 10) {
+                        return { num1, num2, difference, type: 'subtraction' };
+                    }
+                }
+            } while (true); // Lặp lại cho đến khi tạo được bài toán hợp lệ
+        }
+
+        // Hàm tạo một bài toán tổng hợp (cộng/trừ, có/không nhớ)
+        function generateMixedProblem() {
+            const problemGenerators = [
+                generateAdditionProblemWithCarry,
+                generateAdditionProblemNoCarry,
+                generateSubtractionProblemWithBorrow,
+                generateSubtractionProblemNoBorrow
+            ];
+            const randomIndex = getRandomInt(0, problemGenerators.length - 1);
+            return problemGenerators[randomIndex]();
+        }
+
+        // Hàm lưu điểm vào localStorage
+        function saveScores() {
+            localStorage.setItem('mathScores', JSON.stringify(scores));
+        }
+
+        // Hàm tải điểm từ localStorage
+        function loadScores() {
+            const storedScores = localStorage.getItem('mathScores');
+            if (storedScores) {
+                scores = JSON.parse(storedScores);
+            }
+        }
+
+        // Hàm hiển thị trang chủ với danh sách bài tập
+        function renderHomepage() {
+            homepageView.classList.remove('hidden');
+            exerciseView.classList.add('hidden');
+            finalMessage.classList.add('hidden');
+            exerciseList.innerHTML = ''; // Xóa danh sách trước đó
+
+            for (let i = 0; i < NUM_EXERCISES; i++) {
+                const exerciseId = `exercise_${i}`;
+                const currentScore = scores[exerciseId] || `0/${QUESTIONS_PER_EXERCISE}`;
+                let buttonClass = 'bg-blue-500 hover:bg-blue-600'; // Màu mặc định
+
+                if (currentScore === `${QUESTIONS_PER_EXERCISE}/${QUESTIONS_PER_EXERCISE}`) {
+                    buttonClass = 'bg-green-500 hover:bg-green-600'; // Tất cả đúng
+                } else if (currentScore !== `0/${QUESTIONS_PER_EXERCISE}` && currentScore.includes('/')) {
+                    // Kiểm tra nếu điểm không phải 0/10 nhưng cũng không phải 10/10
+                    const [correct, total] = currentScore.split('/').map(Number);
+                    if (correct > 0) {
+                        buttonClass = 'bg-yellow-500 hover:bg-yellow-600'; // Đã thử nhưng chưa hoàn hảo
+                    }
+                }
+
+                const exerciseButton = document.createElement('button');
+                exerciseButton.className = `exercise-button ${buttonClass}`;
+                exerciseButton.innerHTML = `Bài ${i + 1}<br><span class="text-sm mt-1">Điểm: ${currentScore}</span>`;
+                exerciseButton.dataset.exerciseIndex = i;
+                exerciseButton.addEventListener('click', () => showExercise(i));
+                exerciseList.appendChild(exerciseButton);
+            }
+        }
+
+        // Hàm hiển thị một bài tập cụ thể
+        function showExercise(index) {
+            currentExerciseIndex = index;
+            homepageView.classList.add('hidden');
+            exerciseView.classList.remove('hidden');
+            renderExercise(currentExerciseIndex);
+        }
+
+        // Hàm xử lý đầu vào trong trường hàng đơn vị và tự động focus hàng chục
+        function handleUnitsInput(inputElement) {
+            // Nếu một chữ số đã được nhập vào trường đơn vị
+            if (inputElement.value.length === 1) {
+                const problemIndex = inputElement.dataset.problemIndex;
+                // Tìm trường nhập hàng chục tương ứng cho bài toán này
+                const tensInput = document.querySelector(`input.tens-input[data-problem-index="${problemIndex}"]`);
+                // Nếu tìm thấy, focus vào nó
+                if (tensInput) {
+                    tensInput.focus();
+                }
+            }
+        }
+
+        // Hàm hiển thị một bài tập
+        function renderExercise(exerciseIndex) {
+            exerciseContainer.innerHTML = ''; // Xóa bài tập trước đó
+
+            const exercise = exercisesData[exerciseIndex];
+            if (!exercise) {
+                console.error("Không tìm thấy dữ liệu bài tập cho chỉ mục:", exerciseIndex);
+                return;
+            }
+
+            const exerciseDiv = document.createElement('div');
+            exerciseDiv.className = 'exercise mb-8 p-6 bg-blue-50 rounded-lg shadow-md';
+            exerciseDiv.innerHTML = `
+                <h3 class="text-2xl font-bold text-gray-700 mb-6">Bài tập ${exerciseIndex + 1}</h3>
+                <div class="problem-grid" id="problems-grid-${exerciseIndex}"></div>
+                <div class="mt-8 flex justify-center">
+                    <button class="check-answers-btn bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out mr-4">
+                        Kiểm tra đáp án
+                    </button>
+                    <span class="score-display text-xl font-semibold text-gray-700">Điểm: ${scores[`exercise_${exerciseIndex}`] || `0/${QUESTIONS_PER_EXERCISE}`}</span>
+                </div>
+            `;
+            exerciseContainer.appendChild(exerciseDiv);
+
+            const problemsGrid = document.getElementById(`problems-grid-${exerciseIndex}`);
+
+            exercise.problems.forEach((problem, problemIndex) => {
+                const operator = problem.type === 'addition' ? '+' : '-';
+                const correctAnswer = problem.type === 'addition' ? problem.sum : problem.difference;
+
+                const problemItem = document.createElement('div');
+                problemItem.className = 'problem-item';
+                problemItem.innerHTML = `
+                    <div class="number">${problem.num1}</div>
+                    <div class="number flex justify-between items-center w-full">
+                        <span class="mr-2">${operator}</span>${problem.num2}
+                    </div>
+                    <div class="line"></div>
+                    <div class="input-group">
+                        <input type="text" maxlength="1" class="answer-input tens-input" data-problem-index="${problemIndex}" data-digit="tens" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1)">
+                        <input type="text" maxlength="1" class="answer-input units-input" data-problem-index="${problemIndex}" data-digit="units" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1); handleUnitsInput(this);">
+                    </div>
+                    <div class="result-icon" id="result-icon-${exerciseIndex}-${problemIndex}"></div>
+                `;
+                problemsGrid.appendChild(problemItem);
+            });
+
+            // Thêm trình nghe sự kiện để kiểm tra câu trả lời
+            exerciseDiv.querySelector('.check-answers-btn').addEventListener('click', () => checkAnswers(exerciseIndex));
+
+            updateNavigationButtons();
+        }
+
+        // Hàm kiểm tra câu trả lời cho bài tập hiện tại
+        function checkAnswers(exerciseIndex) {
+            const exercise = exercisesData[exerciseIndex];
+            if (!exercise) return;
+
+            let correctCount = 0;
+            exercise.problems.forEach((problem, problemIndex) => {
+                const tensInput = document.querySelector(`#problems-grid-${exerciseIndex} input.tens-input[data-problem-index="${problemIndex}"]`);
+                const unitsInput = document.querySelector(`#problems-grid-${exerciseIndex} input.units-input[data-problem-index="${problemIndex}"]`);
+                const resultIcon = document.getElementById(`result-icon-${exerciseIndex}-${problemIndex}`);
+
+                const userAnswerTens = tensInput.value;
+                const userAnswerUnits = unitsInput.value;
+                const userAnswer = parseInt(`${userAnswerTens || '0'}${userAnswerUnits || '0'}`); // Kết hợp và phân tích
+
+                const correctAnswer = problem.type === 'addition' ? problem.sum : problem.difference;
+
+                // Xóa trạng thái trước đó
+                resultIcon.innerHTML = '';
+                resultIcon.classList.remove('correct', 'incorrect');
+
+                if (userAnswer === correctAnswer && String(userAnswer).length === String(correctAnswer).length) {
+                    resultIcon.innerHTML = '&#10003;'; // Dấu tích
+                    resultIcon.classList.add('correct');
+                    correctCount++;
+                } else {
+                    resultIcon.innerHTML = '&#10007;'; // Dấu X
+                    resultIcon.classList.add('incorrect');
+                }
+            });
+
+            // Cập nhật hiển thị điểm cho bài tập hiện tại
+            const currentScoreDisplay = `${correctCount}/${QUESTIONS_PER_EXERCISE}`;
+            exerciseContainer.querySelector('.score-display').textContent = `Điểm: ${currentScoreDisplay}`;
+
+            // Lưu điểm
+            scores[`exercise_${exerciseIndex}`] = currentScoreDisplay;
+            saveScores();
+
+            const allPerfect = Object.values(scores).every(score => score === `${QUESTIONS_PER_EXERCISE}/${QUESTIONS_PER_EXERCISE}`);
+            if (allPerfect && Object.keys(scores).length === NUM_EXERCISES) {
+                 finalMessage.classList.remove('hidden');
+            }
+        }
+
+        // Hàm cập nhật khả năng hiển thị của các nút điều hướng
+        function updateNavigationButtons() {
+            prevExerciseBtn.classList.add('hidden');
+            nextExerciseBtn.classList.add('hidden');
+
+            if (currentExerciseIndex > 0) {
+                prevExerciseBtn.classList.remove('hidden');
+            }
+            if (currentExerciseIndex < NUM_EXERCISES - 1) {
+                nextExerciseBtn.classList.remove('hidden');
+            }
+        }
+
+        // Event listener for "Clear All Scores" button
+        clearScoresBtn.addEventListener('click', () => {
+            confirmationModal.classList.remove('hidden');
+            confirmationInput.value = ''; // Clear previous input
+            modalMessage.classList.add('hidden'); // Hide previous message
+            confirmationInput.focus();
+        });
+
+        // Event listener for Confirm button in modal
+        confirmClearBtn.addEventListener('click', () => {
+            if (confirmationInput.value === '000') {
+                localStorage.removeItem('mathScores');
+                scores = {};
+                renderHomepage();
+                confirmationModal.classList.add('hidden');
+            } else {
+                modalMessage.textContent = "Mã xác nhận không đúng.";
+                modalMessage.classList.remove('hidden');
+            }
+        });
+
+        // Event listener for Cancel button in modal
+        cancelClearBtn.addEventListener('click', () => {
+            confirmationModal.classList.add('hidden');
+        });
+
+        // Trình nghe sự kiện cho điều hướng
+        prevExerciseBtn.addEventListener('click', () => {
+            if (currentExerciseIndex > 0) {
+                showExercise(currentExerciseIndex - 1);
+            }
+        });
+
+        nextExerciseBtn.addEventListener('click', () => {
+            if (currentExerciseIndex < NUM_EXERCISES - 1) {
+                showExercise(currentExerciseIndex + 1);
+            }
+        });
+
+        backToHomeBtn.addEventListener('click', renderHomepage);
+
+        // Khởi tạo bài tập và tải điểm
+        function initializeApplication() {
+            loadScores(); // Tải điểm trước
+
+            // Tạo tất cả các bài toán chỉ một lần nếu chưa được tạo (để duy trì giữa các phiên)
+            if (exercisesData.length === 0) {
+                for (let i = 0; i < NUM_EXERCISES; i++) {
+                    let problems = [];
+                    for (let j = 0; j < QUESTIONS_PER_EXERCISE; j++) {
+                        problems.push(generateMixedProblem()); // Thay đổi hàm tạo bài toán
+                    }
+                    exercisesData.push({ id: i, problems: problems });
+                }
+            }
+
+            renderHomepage(); // Hiển thị trang chủ ban đầu
+        }
+
+        // Bắt đầu ứng dụng khi DOM được tải đầy đủ
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApplication();
+        });
+
+    </script>
+<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "eed08efb2b414db28f2f6473bf39c1a2"}'></script><!-- Cloudflare Pages Analytics --></body>
+</html>

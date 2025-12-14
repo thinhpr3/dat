@@ -1,0 +1,272 @@
+
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Trắc nghiệm hoàn thành từ — theo từng chủ đề</title>
+  <style>
+    body{font-family:Arial, sans-serif;max-width:900px;margin:20px auto;padding:20px}
+    h1{font-size:1.8rem;margin-bottom:10px}
+    .tabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+    .tab{
+      padding:8px 14px;border-radius:6px;background:#eee;
+      cursor:pointer;border:1px solid #ccc;transition:0.2s
+    }
+    .tab.active{background:#0077cc;color:white;border-color:#0077cc}
+    .tab:hover{background:#dfefff}
+    .card{border:1px solid #ddd;border-radius:10px;padding:15px;margin:12px 0;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+    .qnum{font-weight:bold;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+    .tts-btn{cursor:pointer;font-size:20px;border:none;background:none}
+    .choices label{display:block;margin:3px 0;cursor:pointer}
+    .feedback{margin-top:6px;font-weight:600}
+    .correct{color:green}
+    .wrong{color:#d14343}
+    button{
+      padding:10px 15px;border:none;border-radius:8px;cursor:pointer;
+      color:#fff;background:#0077cc;margin-right:6px;margin-top:20px
+    }
+    button.secondary{background:#777}
+    #voiceSelect{padding:8px;margin-top:10px}
+    /* Nút game */
+.btn {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    background: #4CAF50;
+    box-shadow: 0 8px #999;
+}
+
+.btn:active {
+    box-shadow: 0 3px #666;
+    transform: translateY(5px);
+}
+
+.btn:hover {
+    filter: brightness(1.1);
+}
+  </style>
+</head>
+
+<body>
+<a href="index.html" class="btn">🏠 Quay lại Trang Chủ</a>
+<h1>Trắc nghiệm hoàn thành từ</h1>
+<p>Điền chữ cái còn thiếu vào từ đúng theo từng chủ đề.</p>
+
+<!-- Bộ chọn giọng đọc -->
+<select id="voiceSelect">
+  <option value="en-US">Giọng Mỹ (US)</option>
+  <option value="en-GB">Giọng Anh (UK)</option>
+</select>
+
+<div id="tabs" class="tabs"></div>
+<div id="content"></div>
+
+<p>
+  <button id="check">Kiểm tra</button>
+  <button class="secondary" id="reset">Làm lại</button>
+  <button class="secondary" onclick="deleteSaved()">Xóa kết quả lưu</button>
+</p>
+
+<div id="result" style="margin-top:12px;font-weight:bold"></div>
+<div id="saved" style="margin-top:10px;color:#444;font-weight:bold"></div>
+
+<script>
+// ==========================
+// DỮ LIỆU CHỦ ĐỀ
+// ==========================
+const topics = {
+  "Numbers": ['one','two','three','four','five','six','seven','eight','nine','ten'],
+  "My Toys": ['ball','doll','game','kite','plane','teddy bear'],
+  "Shapes": ['circle','square','star','heart','triangle'],
+  "My Family": ['grandpa','grandma','dad','mum','brother','sister','me','baby'],
+  "At home": ['bathroom','bedroom','kitchen','living room','bed','shower','table','tv'],
+  "My town": ['library','park','playground','store','pool','zoo']
+};
+
+let answers = {};
+let currentTopic = Object.keys(topics)[0];
+
+
+// ==========================
+// TEXT-TO-SPEECH (TTS)
+// ==========================
+function speakWord(word) {
+  const voice = document.getElementById("voiceSelect").value;
+
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.lang = voice;
+  utter.rate = 0.9;
+
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+
+
+// ==========================
+// LƯU & HIỂN THỊ TAB
+// ==========================
+function renderTabs() {
+  const html = Object.keys(topics).map((t,i)=>{
+    const raw = localStorage.getItem("quiz_"+t);
+    let label = raw ? `${t} (${JSON.parse(raw).score}/${JSON.parse(raw).total})`
+                    : `${t} (?/?)`;
+    return `<div class="tab ${i===0?'active':''}" data-tab="${t}">${label}</div>`;
+  }).join("");
+
+  document.getElementById('tabs').innerHTML = html;
+  setupTabEvents();
+}
+
+
+// ==========================
+// TAB CLICK EVENT
+// ==========================
+function setupTabEvents(){
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.onclick = ()=>{
+      document.querySelector('.tab.active')?.classList.remove('active');
+      tab.classList.add('active');
+      currentTopic = tab.dataset.tab;
+      renderTopic(currentTopic);
+      document.getElementById('result').innerHTML = "";
+    };
+  });
+}
+
+
+// ==========================
+// DATA LƯU
+// ==========================
+function saveResult(topic, score, total){
+  localStorage.setItem("quiz_"+topic,
+    JSON.stringify({score, total, time:new Date().toLocaleString()})
+  );
+  loadSaved(topic);
+  renderTabs();
+}
+
+function loadSaved(topic){
+  const raw = localStorage.getItem("quiz_"+topic);
+  if(!raw){
+    document.getElementById('saved').innerHTML = "Chưa có kết quả lưu cho chủ đề này.";
+    return;
+  }
+  const d = JSON.parse(raw);
+  document.getElementById('saved').innerHTML =
+    `Kết quả đã lưu: ${d.score}/${d.total} điểm (lúc: ${d.time})`;
+}
+
+function deleteSaved(){
+  Object.keys(topics).forEach(t => localStorage.removeItem("quiz_"+t));
+  renderTabs();
+  document.getElementById('saved').innerHTML = "Đã xóa toàn bộ kết quả lưu.";
+}
+
+
+// ==========================
+// TẠO CÂU HỎI
+// ==========================
+function hideRandomLetter(word){
+  const clean = word.replace(/ /g,'');
+  const idx = Math.floor(Math.random()*clean.length);
+  const hidden = clean[idx];
+
+  let id2 = 0;
+  const display = word.replace(/./g,(c)=>{
+    if(c===' ') return ' ';
+    return id2++ === idx ? '_' : c;
+  });
+
+  return {hidden, display};
+}
+
+function renderTopic(topic){
+  const words = topics[topic];
+  let html = "";
+  answers = {};
+  let id = 1;
+
+  words.forEach(w=>{
+    const mask = hideRandomLetter(w.toLowerCase());
+    const missing = mask.hidden;
+
+    const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+    let opts = new Set([missing]);
+    while(opts.size < 4) opts.add(letters[Math.floor(Math.random()*26)]);
+    opts = [...opts].sort();
+
+    html += `
+      <div class="card">
+        <div class="qnum">
+          ${id}. ${mask.display}
+          <button class="tts-btn" onclick="speakWord('${w}')">🔊</button>
+        </div>
+        <div class="choices">
+          ${opts.map(o => `<label><input type="radio" name="q${id}" value="${o}"> ${o}</label>`).join("")}
+        </div>
+        <div id="fb${id}" class="feedback"></div>
+      </div>
+    `;
+
+    answers["q"+id] = missing;
+    id++;
+  });
+
+  document.getElementById('content').innerHTML = html;
+  loadSaved(topic);
+}
+
+
+// ==========================
+// CHẤM ĐIỂM
+// ==========================
+document.getElementById('check').onclick = ()=>{
+  let score = 0;
+  const total = Object.keys(answers).length;
+
+  for(let i=1;i<=total;i++){
+    const fb = document.getElementById("fb"+i);
+    const r = document.querySelector(`input[name=q${i}]:checked`);
+
+    if(!r){
+      fb.innerHTML = `<span class="wrong">Chưa chọn</span>`;
+      continue;
+    }
+    if(r.value === answers["q"+i]){
+      fb.innerHTML = `<span class="correct">Đúng</span>`;
+      score++;
+    } else {
+      fb.innerHTML = `<span class="wrong">Sai — đúng: ${answers["q"+i]}</span>`;
+    }
+  }
+
+  document.getElementById("result").innerText = `Bạn được ${score}/${total} điểm`;
+  saveResult(currentTopic, score, total);
+};
+
+
+// ==========================
+// RESET
+// ==========================
+document.getElementById('reset').onclick = ()=>{
+  document.querySelectorAll('input[type=radio]').forEach(i => i.checked = false);
+  document.querySelectorAll('.feedback').forEach(f => f.innerHTML = "");
+  document.getElementById('result').innerText = "";
+};
+
+
+// ==========================
+// KHỞI ĐỘNG
+// ==========================
+renderTabs();
+renderTopic(currentTopic);
+
+</script>
+<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0320b6eab8b84dc6a247e9dd3ed3fa80"}'></script><!-- Cloudflare Pages Analytics --></body>
+</html>

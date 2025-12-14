@@ -1,0 +1,341 @@
+
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Nghe & Gõ Từ Vựng</title>
+
+<style>
+body{
+  font-family:'Comic Sans MS', Arial, sans-serif;
+  background:linear-gradient(#e3f2fd,#ffffff);
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+
+h1{
+  font-size:2.4rem;
+  color:#1565c0;
+  text-align:center;
+}
+
+#stars{
+  text-align:center;
+  font-size:30px;
+  margin-bottom:10px;
+}
+
+.tabs{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+
+.tab{
+  padding:14px 22px;
+  font-size:20px;
+  border-radius:16px;
+  background:#fff176;
+  cursor:pointer;
+  border:3px solid #fbc02d;
+}
+
+.tab.active{
+  background:#ff7043;
+  color:white;
+  border-color:#ff7043;
+}
+
+.card{
+  background:white;
+  border-radius:20px;
+  padding:22px;
+  margin:16px 0;
+  box-shadow:0 6px 14px rgba(0,0,0,.15);
+}
+
+.qnum{
+  font-size:24px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.tts-btn{
+  font-size:32px;
+  border:none;
+  background:none;
+  cursor:pointer;
+}
+
+.answer-input{
+  margin-top:14px;
+  padding:14px;
+  font-size:24px;
+  width:280px;
+  border-radius:14px;
+  border:3px solid #90caf9;
+}
+
+.hint{
+  margin-top:10px;
+  font-size:20px;
+  color:#555;
+}
+
+.feedback{
+  font-size:22px;
+  margin-top:10px;
+  font-weight:bold;
+}
+
+.correct{color:#2e7d32}
+.wrong{color:#c62828}
+
+.check-btn{
+  margin-top:12px;
+  padding:12px 22px;
+  font-size:18px;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  background:#42a5f5;
+  color:white;
+}
+
+.check-btn:disabled{
+  background:#a5d6a7;
+}
+
+.full{
+  background:#26a69a;
+  color:white;
+  padding:10px 18px;
+  font-size:18px;
+  border-radius:14px;
+  border:none;
+  cursor:pointer;
+}
+
+select{
+  padding:10px;
+  font-size:18px;
+  border-radius:12px;
+}
+
+/* Nút game */
+.btn {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    background: #4CAF50;
+    box-shadow: 0 8px #999;
+}
+
+.btn:active {
+    box-shadow: 0 3px #666;
+    transform: translateY(5px);
+}
+
+.btn:hover {
+    filter: brightness(1.1);
+}
+</style>
+</head>
+
+<body>
+<a href="index.html" class="btn">🏠 Quay lại Trang Chủ</a>
+<h1>🎧 Nghe & Gõ Từ Vựng</h1>
+
+<div id="stars">⭐ Sao: <span id="starCount">0</span></div>
+
+<div style="text-align:center;margin-bottom:15px">
+  <!-- ẨN chọn giọng cho học sinh -->
+  <!--
+  <select id="voiceSelect" style="display:none">
+    <option value="en-US" selected>US</option>
+    <option value="en-GB">UK</option>
+  </select>
+  --!>
+  <select id="voiceSelect" style="display:none">
+    <option value="en-GB">UK</option>
+  </select>
+  <button class="full" onclick="toggleFullscreen()">⛶ Toàn màn hình</button>
+</div>
+
+<div id="tabs" class="tabs"></div>
+<div id="content"></div>
+
+<!-- NÚT XÓA KẾT QUẢ -->
+<div style="text-align:center;margin:30px 0">
+  <button onclick="askTeacherPassword()"
+    style="
+      background:#ef5350;
+      color:white;
+      padding:16px 26px;
+      font-size:20px;
+      border:none;
+      border-radius:18px;
+      cursor:pointer;">
+    🗑 Xóa kết quả
+  </button>
+</div>
+
+<script>
+// ================== MẬT KHẨU GIÁO VIÊN ==================
+const TEACHER_PASSWORD = "1234"; // 👈 ĐỔI TẠI ĐÂY
+
+// ================== DATA ==================
+const topics={
+  "Numbers":["one","two","three","four","five","six","seven","eight","nine","ten"],
+  "My Toys":["ball","doll","game","kite","plane","teddy bear"],
+  "Shapes":["circle","square","star","heart","triangle"],
+  "My Family":["dad","mum","brother","sister","baby"],
+  "At home":["bed","table","kitchen","tv","shower"],
+  "My town":["park","library","zoo","store"]
+};
+
+let answers={}, checked={}, currentTopic=Object.keys(topics)[0];
+let stars=Number(localStorage.getItem("stars")||0);
+starCount.innerText=stars;
+
+// ================== ÂM THANH PHẢN HỒI ==================
+function say(text){
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang="en-US";
+  u.rate=0.9;
+  speechSynthesis.speak(u);
+}
+
+// ================== TTS ==================
+function speakWord(word){
+  const u=new SpeechSynthesisUtterance(word);
+  u.lang=voiceSelect.value;
+  u.rate=0.85;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+// ================== FULLSCREEN ==================
+function toggleFullscreen(){
+  document.fullscreenElement
+    ? document.exitFullscreen()
+    : document.documentElement.requestFullscreen();
+}
+
+// ================== TABS ==================
+function renderTabs(){
+  tabs.innerHTML=Object.keys(topics).map((t,i)=>
+    `<div class="tab ${i===0?'active':''}" data-tab="${t}">${t}</div>`
+  ).join("");
+
+  document.querySelectorAll(".tab").forEach(tab=>{
+    tab.onclick=()=>{
+      document.querySelector(".tab.active").classList.remove("active");
+      tab.classList.add("active");
+      currentTopic=tab.dataset.tab;
+      renderTopic(currentTopic);
+    };
+  });
+}
+
+// ================== QUESTIONS ==================
+function renderTopic(topic){
+  answers={}; checked={};
+  let html="", id=1;
+
+  topics[topic].forEach(w=>{
+    html+=`
+    <div class="card">
+      <div class="qnum">${id}.
+        <button class="tts-btn" onclick="speakWord('${w}')">🔊</button>
+      </div>
+
+      <input class="answer-input" id="q${id}" placeholder="Nghe và gõ từ">
+
+      <div class="hint">💡 Bắt đầu bằng <b>${w[0].toUpperCase()}</b></div>
+
+      <button class="check-btn" onclick="checkOne(${id})">✔ Kiểm tra</button>
+
+      <div id="fb${id}" class="feedback"></div>
+    </div>`;
+    answers[id]=w.toLowerCase();
+    checked[id]=false;
+    id++;
+  });
+
+  content.innerHTML=html;
+}
+
+// ================== CHECK ONE ==================
+function checkOne(id){
+  if(checked[id]) return;
+
+  const input=document.getElementById("q"+id);
+  const fb=document.getElementById("fb"+id);
+  const btn=input.parentElement.querySelector(".check-btn");
+
+  if(!input.value){
+    fb.innerHTML="<span class='wrong'>Chưa nhập</span>";
+    say("Try again");
+    return;
+  }
+
+  if(input.value.trim().toLowerCase()===answers[id]){
+    fb.innerHTML="<span class='correct'>✔ Correct!</span>";
+    say("Correct");
+    stars++;
+    starCount.innerText=stars;
+    localStorage.setItem("stars",stars);
+    checked[id]=true;
+    btn.disabled=true;
+    input.disabled=true;
+  }else{
+    fb.innerHTML="<span class='wrong'>✘ Try again</span>";
+    say("Try again");
+  }
+}
+
+// ================== XÓA KẾT QUẢ (CÓ MẬT KHẨU) ==================
+function askTeacherPassword(){
+  const pass=prompt("🔑 Nhập mật khẩu giáo viên:");
+  if(pass===null) return;
+  if(pass!==TEACHER_PASSWORD){
+    alert("❌ Sai mật khẩu!");
+    return;
+  }
+  clearResults();
+}
+
+function clearResults(){
+  stars=0;
+  localStorage.removeItem("stars");
+  starCount.innerText=0;
+
+  document.querySelectorAll(".answer-input").forEach(i=>{
+    i.value="";
+    i.disabled=false;
+  });
+  document.querySelectorAll(".feedback").forEach(f=>f.innerHTML="");
+  document.querySelectorAll(".check-btn").forEach(b=>b.disabled=false);
+
+  checked={};
+  alert("✅ Đã xóa toàn bộ kết quả");
+}
+
+// ================== INIT ==================
+renderTabs();
+renderTopic(currentTopic);
+</script>
+
+<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0320b6eab8b84dc6a247e9dd3ed3fa80"}'></script><!-- Cloudflare Pages Analytics --></body>
+</html>

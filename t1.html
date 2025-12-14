@@ -1,0 +1,569 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài tập Toán - Cộng trừ trong phạm vi 100</title>
+    <!-- Tải Tailwind CSS để tạo kiểu dựa trên tiện ích -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải phông chữ Inter từ Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Kiểu cơ bản cho phần thân, áp dụng phông chữ Inter và nền xanh nhạt */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff; /* Màu xanh rất nhạt */
+            display: flex; /* Sử dụng flexbox để căn giữa nội dung */
+            align-items: center; /* Căn giữa theo chiều dọc */
+            justify-content: center; /* Căn giữa theo chiều ngang */
+            min-height: 100vh; /* Đảm bảo phần thân chiếm toàn bộ chiều cao khung nhìn */
+            margin: 0; /* Xóa lề mặc định của phần thân */
+        }
+        /* Container cho nội dung ứng dụng chính, với chiều rộng tối đa để đáp ứng */
+        .container {
+            max-width: 600px; /* Chiều rộng tối đa cho nội dung */
+            width: 95%; /* Chiều rộng đáp ứng */
+            margin: 20px auto; /* Lề tự động để căn giữa theo chiều ngang, 20px theo chiều dọc */
+            padding: 20px;
+        }
+        /* Kiểu thẻ cho các màn hình (trang chủ, bài kiểm tra, kết quả) */
+        .card {
+            background-color: #ffffff; /* Nền trắng */
+            border-radius: 12px; /* Góc bo tròn */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Bóng mềm để tạo chiều sâu */
+            padding: 30px; /* Đệm bên trong */
+            position: relative; /* Cần thiết để định vị nút quay lại */
+        }
+        /* Kiểu cho các tiêu đề chính trên màn hình chính và màn hình kết quả */
+        .home-title {
+            font-size: 2rem; /* Cỡ chữ lớn */
+            font-weight: 700; /* Độ đậm của chữ */
+            color: #1e3a8a; /* Màu xanh đậm */
+            text-align: center; /* Căn giữa văn bản */
+            margin-bottom: 2rem; /* Khoảng trống bên dưới tiêu đề */
+        }
+        /* Bố cục lưới cho các nút tab trên màn hình chính */
+        .tab-grid {
+            display: grid;
+            /* Lưới đáp ứng: cột tự động lấp đầy, tối thiểu 120px, tối đa 1fr */
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem; /* Khoảng cách giữa các mục lưới */
+        }
+        /* Kiểu cho từng nút tab */
+        .tab-btn {
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease; /* Chuyển động mượt mà cho hiệu ứng di chuột */
+            background-color: #3b82f6; /* Màu xanh dương mặc định */
+            color: white; /* Chữ trắng */
+            border: none;
+            text-align: center;
+            display: flex; /* Sử dụng flexbox để căn giữa nội dung và điểm */
+            flex-direction: column; /* Sắp xếp theo chiều dọc */
+            justify-content: center;
+            align-items: center;
+        }
+        /* Kiểu cho điểm số bên trong nút tab */
+        .tab-btn span {
+            font-size: 0.8rem;
+            font-weight: 400;
+            margin-top: 0.25rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .tab-btn:hover {
+            background-color: #2563eb; /* Xanh đậm hơn khi di chuột */
+            transform: translateY(-2px); /* Hiệu ứng nhấc nhẹ */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Bóng lớn hơn khi di chuột */
+        }
+
+        /* Thêm các kiểu mới cho trạng thái hoàn thành của nút tab */
+        .tab-btn.tab-btn-perfect {
+            background-color: #22c55e; /* Xanh lá cây cho điểm tối đa */
+        }
+        .tab-btn.tab-btn-perfect:hover {
+            background-color: #16a34a;
+        }
+
+        .tab-btn.tab-btn-completed {
+            background-color: #facc15; /* Vàng cho đã làm nhưng chưa tối đa */
+            color: #3f3f46; /* Chữ tối màu hơn cho nền vàng */
+        }
+        .tab-btn.tab-btn-completed:hover {
+            background-color: #eab308;
+        }
+
+        /* Kiểu cho văn bản câu hỏi */
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            text-align: center; /* Căn giữa văn bản câu hỏi */
+        }
+        /* Kiểu cho các nút trả lời */
+        .answer-btn {
+            display: block; /* Đặt các nút ở cấp khối */
+            width: 100%; /* Chiều rộng đầy đủ */
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 1.125rem;
+            text-align: left; /* Căn trái văn bản trong nút */
+            background-color: #e0f2fe; /* Nền xanh nhạt */
+            color: #0c4a6e; /* Chữ xanh đậm */
+            border: 2px solid transparent; /* Viền trong suốt */
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease; /* Chuyển động mượt mà */
+        }
+        .answer-btn:hover {
+            background-color: #bae6fd; /* Xanh nhạt hơn khi di chuột */
+            border-color: #7dd3fc; /* Viền xanh khi di chuột */
+        }
+        /* Kiểu cho nút trả lời đã chọn */
+        .answer-btn.selected {
+            background-color: #38bdf8; /* Xanh sáng hơn khi chọn */
+            color: white;
+            border-color: #0ea5e9;
+        }
+        /* Kiểu cho nút trả lời đúng */
+        .answer-btn.correct {
+            background-color: #22c55e; /* Xanh lá cây cho đúng */
+            color: white;
+            border-color: #16a34a;
+        }
+        /* Kiểu cho nút trả lời sai */
+        .answer-btn.incorrect {
+            background-color: #ef4444; /* Đỏ cho sai */
+            color: white;
+            border-color: #dc2626;
+        }
+        /* Kiểu cho các nút điều khiển (Tiếp theo, Làm lại, Trang chủ) */
+        .control-btn {
+            padding: 12px 24px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease; /* Thêm transform cho hiệu ứng di chuột */
+            margin: 10px; /* Lề xung quanh các nút */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Bóng mềm */
+        }
+        .control-btn:hover {
+            transform: translateY(-2px); /* Hiệu ứng nhấc nhẹ khi di chuột */
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15); /* Bóng tăng cường */
+        }
+        /* Kiểu cho các biểu tượng phản hồi (dấu tích/dấu x) */
+        .feedback-icon {
+            margin-left: 8px;
+            font-size: 1.2em; /* Lớn hơn một chút so với văn bản */
+            vertical-align: middle; /* Căn chỉnh với văn bản */
+        }
+        /* Kiểu cho nút quay lại trang chủ */
+        .back-btn {
+            position: absolute; /* Định vị tuyệt đối */
+            top: 20px;
+            left: 20px;
+            background: none; /* Không có nền */
+            border: none; /* Không có viền */
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6b7280; /* Màu chữ xám */
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.2s ease; /* Chuyển đổi màu mượt mà */
+        }
+        .back-btn:hover {
+            color: #1d4ed8; /* Xanh đậm hơn khi di chuột */
+        }
+        /* Kiểu cho hình ảnh kết quả */
+        #result-image {
+            max-width: 200px;
+            height: auto; /* Duy trì tỷ lệ khung hình */
+            display: none; /* Ẩn theo mặc định, hiển thị bằng JS */
+            margin: 0 auto 1rem auto; /* Căn giữa hình ảnh và thêm lề dưới */
+            border-radius: 8px; /* Góc bo tròn cho hình ảnh */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Bóng mềm */
+        }
+        /* Nút game */
+.btn {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    background: #4CAF50;
+    box-shadow: 0 8px #999;
+}
+
+.btn:active {
+    box-shadow: 0 3px #666;
+    transform: translateY(5px);
+}
+
+.btn:hover {
+    filter: brightness(1.1);
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+    <a href="index.html" class="btn">🏠 Quay lại Trang Chủ</a>
+        <!-- Màn hình chính: Cho phép chọn các tab bài tập khác nhau -->
+        <div id="home-screen" class="card">
+            <h1 class="home-title">Chọn bài tập</h1>
+            <div id="tab-container" class="tab-grid">
+                <!-- Các nút tab sẽ được tạo động tại đây bằng JavaScript -->
+            </div>
+        </div>
+
+        <!-- Màn hình bài kiểm tra: Hiển thị câu hỏi và các lựa chọn trả lời -->
+        <div id="quiz-screen" class="card hidden">
+            <!-- Nút để quay lại màn hình chính -->
+            <button id="back-to-home-from-quiz-btn" class="back-btn">&larr; Trang chủ</button>
+            <div id="quiz-header" class="pt-6">
+                <h1 id="quiz-title" class="text-2xl font-bold text-center text-blue-700 mb-4"></h1>
+                <p id="progress-text" class="text-sm text-center text-gray-600 mb-4"></p>
+            </div>
+            <div id="question-container" class="mb-6">
+                <p id="question-text" class="question-text"></p>
+                <div id="answer-buttons" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            </div>
+            <div id="controls" class="text-center">
+                <!-- Nút để chuyển sang câu hỏi tiếp theo, ẩn cho đến khi một câu trả lời được chọn -->
+                <button id="next-btn" class="control-btn bg-blue-500 hover:bg-blue-600 text-white hidden">Câu tiếp theo</button>
+            </div>
+        </div>
+
+        <!-- Màn hình kết quả: Hiển thị điểm bài kiểm tra và thông điệp động viên -->
+        <div id="results-screen" class="card hidden text-center">
+            <h1 class="home-title">Kết quả</h1>
+            <p id="score-text" class="text-2xl font-bold text-blue-800"></p>
+            <!-- Hình ảnh để cung cấp phản hồi trực quan dựa trên hiệu suất -->
+            <img id="result-image" src="" alt="Hình ảnh chúc mừng" class="mx-auto my-4 rounded-lg shadow-md" style="max-width: 200px; display: none;">
+            <p id="result-message" class="text-lg text-gray-700 my-3"></p>
+            <div class="flex flex-wrap justify-center gap-4 mt-4">
+                <!-- Các nút để làm lại bài kiểm tra hoặc quay lại màn hình chính -->
+                <button id="restart-btn" class="control-btn bg-green-500 hover:bg-green-600 text-white">Làm lại</button>
+                <button id="home-btn" class="control-btn bg-gray-500 hover:bg-gray-600 text-white">Quay về trang chủ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Tham chiếu các phần tử DOM ---
+        const homeScreen = document.getElementById('home-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const tabContainer = document.getElementById('tab-container');
+        const quizTitle = document.getElementById('quiz-title');
+        const questionTextElement = document.getElementById('question-text');
+        const answerButtonsElement = document.getElementById('answer-buttons');
+        const nextButton = document.getElementById('next-btn');
+        const progressTextElement = document.getElementById('progress-text');
+        const scoreTextElement = document.getElementById('score-text');
+        const resultImage = document.getElementById('result-image');
+        const resultMessage = document.getElementById('result-message');
+        const restartButton = document.getElementById('restart-btn');
+        const homeButton = document.getElementById('home-btn');
+        const backToHomeFromQuizBtn = document.getElementById('back-to-home-from-quiz-btn');
+
+        // --- Các biến trạng thái của bài kiểm tra ---
+        const TOTAL_TABS = 500;
+        const QUESTIONS_PER_QUIZ = 5;
+        let allQuizzesData = [];
+        let currentQuizIndex;
+        let currentQuestionIndex;
+        let score;
+        let quizScores = {}; // Đối tượng để lưu trữ điểm số của từng bài tập cục bộ
+
+        // --- Logic tạo câu hỏi ---
+
+        /**
+         * Tạo một bài toán cộng (số1 + số2) trong đó không có số nhớ
+         * khi cộng các chữ số hàng đơn vị và tổng nhỏ hơn 100.
+         * @returns {object} Một đối tượng chứa số1, số2, đáp án và toán tử.
+         */
+        function generateNoCarryAddition() {
+            let num1, num2, sum;
+            do {
+                num1 = Math.floor(Math.random() * 90) + 10; // Tạo số từ 10 đến 99
+                num2 = Math.floor(Math.random() * 90) + 10; // Tạo số từ 10 đến 99
+                sum = num1 + num2;
+            } while (
+                (num1 % 10) + (num2 % 10) >= 10 || // Kiểm tra số nhớ ở hàng đơn vị
+                sum >= 100 // Đảm bảo tổng nhỏ hơn 100
+            );
+            return { num1, num2, answer: sum, op: '+' };
+        }
+
+        /**
+         * Tạo một bài toán trừ (số1 - số2) trong đó không cần mượn
+         * từ chữ số hàng chục và kết quả là số dương.
+         * @returns {object} Một đối tượng chứa số1, số2, đáp án và toán tử.
+         */
+        function generateNoBorrowSubtraction() {
+            let num1, num2, difference;
+            do {
+                num1 = Math.floor(Math.random() * 90) + 10; // Tạo số từ 10 đến 99
+                num2 = Math.floor(Math.random() * (num1 - 10)) + 1; // Đảm bảo số2 nhỏ hơn số1
+                difference = num1 - num2;
+            } while (
+                (num1 % 10) < (num2 % 10) || // Kiểm tra việc mượn ở hàng đơn vị
+                difference <= 0 // Đảm bảo kết quả là số dương
+            );
+            return { num1, num2, answer: difference, op: '-' };
+        }
+
+        /**
+         * Tạo một tập hợp các câu hỏi toán học duy nhất cho một bài kiểm tra.
+         * Các câu hỏi bao gồm phép cộng không nhớ và phép trừ không mượn.
+         * @param {number} numQuestions Số lượng câu hỏi mong muốn.
+         * @returns {Array<object>} Một mảng các đối tượng câu hỏi.
+         */
+        function generateQuizQuestions(numQuestions) {
+            const questions = new Set();
+            while (questions.size < numQuestions) {
+                const isAddition = Math.random() > 0.5;
+                const problem = isAddition ? generateNoCarryAddition() : generateNoBorrowSubtraction();
+                
+                const questionText = `${problem.num1} ${problem.op} ${problem.num2} = ?`;
+                const correctAnswer = problem.answer.toString();
+
+                const options = new Set([correctAnswer]);
+                while (options.size < 4) {
+                    const wrongAnswerOffset = Math.floor(Math.random() * 9) - 4;
+                    const wrongAnswer = problem.answer + wrongAnswerOffset;
+                    if (wrongAnswer !== problem.answer && wrongAnswer > 0) {
+                        options.add(wrongAnswer.toString());
+                    }
+                }
+                
+                const questionObject = {
+                    question: questionText,
+                    options: Array.from(options).sort(() => Math.random() - 0.5),
+                    correctAnswer: correctAnswer
+                };
+                
+                questions.add(JSON.stringify(questionObject)); 
+            }
+            return Array.from(questions).map(q => JSON.parse(q));
+        }
+
+        // --- Logic lưu trữ cục bộ (localStorage) ---
+
+        /**
+         * Tải tất cả điểm số đã lưu từ localStorage.
+         * @returns {object} Đối tượng chứa điểm số của các bài tập.
+         */
+        function loadScores() {
+            try {
+                const storedScores = localStorage.getItem('mathQuizScores');
+                return storedScores ? JSON.parse(storedScores) : {};
+            } catch (e) {
+                console.error("Lỗi khi tải điểm số từ localStorage:", e);
+                return {};
+            }
+        }
+
+        /**
+         * Lưu điểm số của một bài tập vào localStorage.
+         * @param {number} quizIndex Chỉ mục của bài tập.
+         * @param {number} score Điểm đạt được.
+         * @param {number} totalQuestions Tổng số câu hỏi.
+         */
+        function saveScore(quizIndex, score, totalQuestions) {
+            quizScores[`quiz_${quizIndex}`] = { score: score, total: totalQuestions };
+            try {
+                localStorage.setItem('mathQuizScores', JSON.stringify(quizScores));
+            } catch (e) {
+                console.error("Lỗi khi lưu điểm số vào localStorage:", e);
+            }
+        }
+
+        // --- Khởi tạo ứng dụng ---
+
+        /**
+         * Ẩn tất cả các màn hình sau đó hiển thị màn hình được chỉ định.
+         * @param {HTMLElement} screen Phần tử màn hình để hiển thị.
+         */
+        function showScreen(screen) {
+            homeScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            screen.classList.remove('hidden');
+        }
+
+        /**
+         * Khởi tạo ứng dụng bằng cách tạo dữ liệu bài kiểm tra và các nút tab.
+         * Tải điểm số đã lưu từ localStorage và hiển thị trên các nút tab.
+         */
+        function initializeApplication() {
+            quizScores = loadScores(); // Tải điểm số đã lưu khi khởi tạo
+
+            // Tạo tất cả dữ liệu bài kiểm tra và các nút tab
+            tabContainer.innerHTML = '';
+            allQuizzesData = [];
+            for (let i = 0; i < TOTAL_TABS; i++) {
+                allQuizzesData.push(generateQuizQuestions(QUESTIONS_PER_QUIZ));
+                const tabButton = document.createElement('button');
+                tabButton.innerText = `Bài ${i + 1}`; // Văn bản ban đầu
+                tabButton.classList.add('tab-btn'); // Áp dụng kiểu dáng
+                
+                // Hiển thị điểm số và thay đổi màu nút nếu đã có
+                const savedScore = quizScores[`quiz_${i}`];
+                if (savedScore) {
+                    const scoreSpan = document.createElement('span');
+                    scoreSpan.innerText = `Điểm: ${savedScore.score}/${savedScore.total}`;
+                    tabButton.appendChild(scoreSpan);
+
+                    // Thay đổi màu nút dựa trên điểm số
+                    if (savedScore.score === savedScore.total) {
+                        tabButton.classList.add('tab-btn-perfect'); // Xanh lá cây cho điểm tối đa
+                    } else {
+                        tabButton.classList.add('tab-btn-completed'); // Vàng cho đã làm nhưng chưa tối đa
+                    }
+                }
+
+                tabButton.addEventListener('click', () => {
+                    startQuiz(i);
+                });
+                tabContainer.appendChild(tabButton);
+            }
+            showScreen(homeScreen); // Hiển thị màn hình chính sau khi khởi tạo
+        }
+        
+        // --- Logic bài kiểm tra ---
+
+        /**
+         * Bắt đầu một bài kiểm tra mới với chỉ mục được chỉ định.
+         * @param {number} quizIndex Chỉ mục của bài kiểm tra để bắt đầu.
+         */
+        function startQuiz(quizIndex) {
+            currentQuizIndex = quizIndex;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            quizTitle.innerText = `Bài tập ${quizIndex + 1}`;
+            showScreen(quizScreen);
+            loadQuestion();
+        }
+
+        /**
+         * Tải và hiển thị câu hỏi hiện tại và các lựa chọn trả lời của nó.
+         * Nếu tất cả các câu hỏi được trả lời, nó sẽ hiển thị màn hình kết quả.
+         */
+        function loadQuestion() {
+            resetState();
+            const quizData = allQuizzesData[currentQuizIndex];
+            if (currentQuestionIndex < quizData.length) {
+                const currentQuestion = quizData[currentQuestionIndex];
+                questionTextElement.innerText = currentQuestion.question;
+                progressTextElement.innerText = `Câu hỏi ${currentQuestionIndex + 1} / ${quizData.length}`;
+
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.innerText = option;
+                    button.classList.add('answer-btn');
+                    button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.correctAnswer));
+                    answerButtonsElement.appendChild(button);
+                });
+            } else {
+                showResults();
+            }
+        }
+
+        /**
+         * Đặt lại trạng thái của các nút trả lời và ẩn nút tiếp theo.
+         */
+        function resetState() {
+            nextButton.classList.add('hidden');
+            while (answerButtonsElement.firstChild) {
+                answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+            }
+        }
+
+        /**
+         * Xử lý lựa chọn trả lời của người dùng, cung cấp phản hồi và cập nhật điểm số.
+         * @param {HTMLButtonElement} selectedButton Phần tử nút đã được nhấp.
+         * @param {string} selectedOption Nội dung văn bản của tùy chọn đã chọn.
+         * @param {string} correctAnswer Câu trả lời đúng cho câu hỏi hiện tại.
+         */
+        function selectAnswer(selectedButton, selectedOption, correctAnswer) {
+            Array.from(answerButtonsElement.children).forEach(button => {
+                button.disabled = true;
+                if (button.innerText === correctAnswer) {
+                    button.classList.add('correct');
+                    button.innerHTML += ' <span class="feedback-icon">✔</span>';
+                }
+                if (button === selectedButton) {
+                    button.classList.add('selected');
+                    if (selectedOption === correctAnswer) {
+                        score++;
+                    } else {
+                        button.classList.add('incorrect');
+                        button.innerHTML += ' <span class="feedback-icon">✘</span>';
+                    }
+                }
+            });
+            nextButton.classList.remove('hidden');
+        }
+
+        /**
+         * Hiển thị kết quả cuối cùng của bài kiểm tra, bao gồm điểm số, thông báo và hình ảnh.
+         * Cũng lưu điểm số vào localStorage.
+         */
+        async function showResults() {
+            showScreen(resultsScreen);
+            const quizData = allQuizzesData[currentQuizIndex];
+            scoreTextElement.innerText = `Bạn đã đạt ${score} / ${quizData.length} điểm.`;
+
+            const percentage = score / quizData.length;
+            if (percentage >= 0.8) {
+                resultMessage.innerText = "Xuất sắc! Bé giỏi quá!";
+                resultImage.src = "https://placehold.co/200x150/4CAF50/FFFFFF?text=Tuy%E1%BB%87t+v%E1%BB%9Di%21";
+            } else if (percentage >= 0.5) {
+                resultMessage.innerText = "Rất tốt! Cố gắng thêm chút nữa nhé!";
+                resultImage.src = "https://placehold.co/200x150/FFC107/000000?text=Kh%C3%A1+l%E1%BA%AFm%21";
+            } else {
+                resultMessage.innerText = "Không sao! Hãy thử lại và học thêm nhé!";
+                resultImage.src = "https://placehold.co/200x150/F44336/FFFFFF?text=C%E1%BB%91+g%E1%BA%AFng+nha%21";
+            }
+            resultImage.style.display = 'block';
+
+            // --- Lưu điểm vào localStorage ---
+            saveScore(currentQuizIndex, score, quizData.length);
+            // Sau khi lưu điểm, cập nhật lại các nút tab để hiển thị trạng thái mới
+            initializeApplication(); 
+        }
+
+        // --- Trình lắng nghe sự kiện ---
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            loadQuestion();
+        });
+
+        restartButton.addEventListener('click', () => {
+             startQuiz(currentQuizIndex);
+        });
+        
+        const goHome = () => {
+            showScreen(homeScreen);
+            initializeApplication(); // Cập nhật lại các tab khi về trang chủ
+        }
+        
+        homeButton.addEventListener('click', goHome);
+        backToHomeFromQuizBtn.addEventListener('click', goHome);
+
+        // --- Khởi động ứng dụng ---
+        // Khởi tạo ứng dụng sau khi nội dung DOM đã được tải hoàn toàn
+        document.addEventListener('DOMContentLoaded', initializeApplication);
+    </script>
+<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "eed08efb2b414db28f2f6473bf39c1a2"}'></script><!-- Cloudflare Pages Analytics --></body>
+</html>
