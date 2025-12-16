@@ -2,11 +2,17 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Bài tập Toán lớp 2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ôn Tập Toán Lớp 2 (AI-Powered)</title>
+
+<script>
+    // Import các thư viện Firebase cần thiết (dù không dùng để lưu trữ, cần cho môi trường Canvas)
+    // Tạm thời bỏ qua Firebase để tập trung vào logic AI
+</script>
 
 <style>
 body {
-    font-family: "Comic Sans MS", Arial, sans-serif;
+    font-family: "Inter", "Comic Sans MS", Arial, sans-serif;
     background: linear-gradient(135deg, #e3f2fd, #fff);
     margin: 0;
     padding: 20px;
@@ -32,18 +38,22 @@ h2 {
     color: #fb8c00;
     margin-top: 30px;
     font-size: 28px;
+    border-bottom: 2px solid #f9a82530;
+    padding-bottom: 5px;
 }
 
-.question {
+.question-group {
     background: #f9fbff;
     border-radius: 18px;
     padding: 18px 22px;
     margin-bottom: 20px;
     border-left: 8px solid #42a5f5;
+    transition: all 0.3s ease;
 }
 
-.question p {
+.question-group p, .question-group ul {
     font-size: 20px;
+    line-height: 1.6;
 }
 
 .options label {
@@ -52,6 +62,11 @@ h2 {
     margin-left: 20px;
     padding: 6px;
     cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+.options label:hover {
+    background-color: #e3f2fd;
 }
 
 .options input {
@@ -61,16 +76,23 @@ h2 {
 
 input[type="text"] {
     font-size: 18px;
-    padding: 6px 10px;
-    width: 140px;
+    padding: 8px 12px;
+    width: 120px;
     border-radius: 10px;
     border: 2px solid #90caf9;
+    transition: border-color 0.3s;
+}
+input[type="text"]:focus {
+    outline: none;
+    border-color: #1e88e5;
+    box-shadow: 0 0 5px rgba(30, 136, 229, 0.5);
 }
 
 .answer {
-    color: green;
     font-style: italic;
     font-size: 18px;
+    margin-top: 10px;
+    padding: 5px 0;
 }
 
 .hidden {
@@ -85,43 +107,71 @@ input[type="text"] {
 button {
     font-size: 20px;
     padding: 12px 28px;
-    margin: 10px;
+    margin: 8px;
     border-radius: 18px;
     border: none;
     cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .submit {
     background: #1e88e5;
     color: white;
 }
+.submit:hover {
+    background: #1565c0;
+    box-shadow: 0 6px 8px rgba(30, 136, 229, 0.3);
+}
+
+.generate-new {
+    background: #43a047;
+    color: white;
+}
+.generate-new:hover {
+    background: #388e3c;
+    box-shadow: 0 6px 8px rgba(67, 160, 71, 0.3);
+}
 
 .toggle {
     background: #f9a825;
     color: white;
 }
+.toggle:hover {
+    background: #fb8c00;
+}
 
 #result {
     text-align: center;
-    font-size: 28px;
+    font-size: 30px;
+    font-weight: bold;
     color: #d32f2f;
     margin-top: 25px;
+    padding: 10px;
+    border-radius: 10px;
 }
+
 .correct {
-    background: #e8f5e9;
     border-left: 8px solid #43a047;
+    background: #e8f5e9;
 }
 
 .wrong {
-    background: #ffebee;
     border-left: 8px solid #e53935;
+    background: #ffebee;
 }
 
-.locked input {
+.locked input, .locked label {
     pointer-events: none;
-    opacity: 0.6;
+    opacity: 0.8;
 }
-
+#loading {
+    display: none;
+    text-align: center;
+    font-size: 24px;
+    color: #1e88e5;
+    margin-top: 20px;
+}
 </style>
 </head>
 
@@ -131,218 +181,287 @@ button {
 
 <h1>📘 BÀI TẬP TOÁN LỚP 2 📘</h1>
 
-<h2>I. Trắc nghiệm</h2>
-
-<div class="question">
-<p>Câu 1: 86 − 18 = ?</p>
-<label><input type="radio" name="c1" value="A"> A. 68</label>
-<label><input type="radio" name="c1" value="B"> B. 86</label>
-<label><input type="radio" name="c1" value="C"> C. 18</label>
-<p class="answer hidden">Đáp án đúng: A</p>
-</div>
-
-<div class="question">
-<p>Câu 2: 56 + 19 = ?</p>
-<label><input type="radio" name="c2" value="A"> A. 65</label>
-<label><input type="radio" name="c2" value="B"> B. 37</label>
-<label><input type="radio" name="c2" value="C"> C. 75</label>
-<p class="answer hidden">Đáp án đúng: C</p>
-</div>
-
-<div class="question">
-<p>Câu 3: Phép tính có hiệu bằng 16</p>
-<label><input type="radio" name="c3" value="A"> A. 76 − 40</label>
-<label><input type="radio" name="c3" value="B"> B. 8 + 8</label>
-<label><input type="radio" name="c3" value="C"> C. 54 − 38</label>
-<p class="answer hidden">Đáp án đúng: C</p>
-</div>
-
-<div class="question">
-<p>Câu 4: Phép tính nào có kết quả bé nhất?</p>
-<label><input type="radio" name="c4" value="A"> A. 75 − 38</label>
-<label><input type="radio" name="c4" value="B"> B. 84 − 48</label>
-<label><input type="radio" name="c4" value="C"> C. 55 + 16</label>
-<label><input type="radio" name="c4" value="D"> D. 35 + 17</label>
-<p class="answer hidden">Đáp án đúng: B</p>
-</div>
-
-<div class="question">
-<p>Câu 5: Nến dài 18cm, cháy hết 1dm còn bao nhiêu?</p>
-<label><input type="radio" name="c5" value="A"> A. 8cm</label>
-<label><input type="radio" name="c5" value="B"> B. 8dm</label>
-<label><input type="radio" name="c5" value="C"> C. 10cm</label>
-<label><input type="radio" name="c5" value="D"> D. 1dm</label>
-<p class="answer hidden">Đáp án đúng: A</p>
-</div>
-
-<div class="question">
-<p>Câu 6: 75 − 57 + … = 67</p>
-<label><input type="radio" name="c6" value="A"> A. 39</label>
-<label><input type="radio" name="c6" value="B"> B. 48</label>
-<label><input type="radio" name="c6" value="C"> C. 49</label>
-<p class="answer hidden">Đáp án đúng: C</p>
-</div>
-
-<div class="question">
-<p>Câu 7: 25dm − 18dm … 100cm − 35cm</p>
-<label><input type="radio" name="c7" value="A"> A. ></label>
-<label><input type="radio" name="c7" value="B"> B. <</label>
-<label><input type="radio" name="c7" value="C"> C. =</label>
-<label><input type="radio" name="c7" value="D"> D. Không có dấu</label>
-<p class="answer hidden">Đáp án đúng: B</p>
-</div>
-
-<div class="question">
-<p>Câu 8: Số hình tam giác là?</p>
-<label><input type="radio" name="c8" value="A"> A. 5</label>
-<label><input type="radio" name="c8" value="B"> B. 6</label>
-<label><input type="radio" name="c8" value="C"> C. 7</label>
-<label><input type="radio" name="c8" value="D"> D. 4</label>
-<p class="answer hidden">Đáp án đúng: A</p>
-</div>
-
-<hr>
-<!-- DÁN NGUYÊN PHẦN TRẮC NGHIỆM CỦA BẠN Ở ĐÂY -->
-<!-- (Không thay đổi nội dung, chỉ hưởng giao diện) -->
-
-<hr>
-
-<h2>II. Tự luận (điền đáp án)</h2>
-
-<div class="question">
-<p><b>Bài 1.</b> Đặt tính rồi tính:</p>
-<div class="question">
-<p>47 + 36 = <input id="tl1"></p>
-<p class="answer hidden">Đáp án đúng: 1111</p>
-</div>
-<div class="question">
-<p>72 − 56 = <input id="tl2"></p>
-<p class="answer hidden">Đáp án đúng: 12</p>
-</div>
-<div class="question">
-<p>81 − 5 = <input id="tl3"></p>
-<p class="answer hidden">Đáp án đúng: 13</p>
-</div>
-<div class="question">
-<p>100 − 23 = <input id="tl4"></p>
-<p class="answer hidden">Đáp án đúng: 14</p>
-</div>
-</div>
-<div class="question">
-<p><b>Bài 2.</b> Tính:</p>
-<div class="question">
-<p>51 − 15 + 18 = <input id="tl5"></p>
-<p class="answer hidden">Đáp án đúng: 14</p>
-</div>
-<div class="question">
-<p>80 − 36 + 17 = <input id="tl6"></p>
-<p class="answer hidden">Đáp án đúng: 114</p>
-</div>
-</div>
-
-<div class="question">
-<p><b>Bài 3.</b><br>
-Mẹ mua <b>3 chục trứng gà</b> và <b>12 quả trứng vịt</b>.<br>
-Hỏi số trứng gà nhiều hơn số trứng vịt là bao nhiêu quả?</p>
-<p>Đáp án: <input id="tl7"> quả</p>
-<p class="answer hidden">Đáp án đúng: 4114</p>
-</div>
-
-<div class="question">
-<p><b>Bài 4.</b><br>
-Tấm vải xanh dài <b>18dm</b>, tấm vải xanh ngắn hơn tấm vải đỏ <b>90cm</b>.<br>
-Hỏi tấm vải đỏ dài bao nhiêu đề-xi-mét?</p>
-<p>Đáp án: <input id="tl8"> dm</p>
-<p class="answer hidden">Đáp án đúng: 3114</p>
-</div>
-
-<div class="question">
-<p><b>Bài 5.</b><br>
-Tìm số có hai chữ số biết:</p>
-<ul style="font-size:18px">
-<li>Tổng hai chữ số bằng 12</li>
-<li>Chữ số hàng chục bé hơn chữ số hàng đơn vị là 2</li>
-</ul>
-<p>Đáp án: <input id="tl9"></p>
-<p class="answer hidden">Đáp án đúng: 57</p>
-</div>
-
-<div class="question">
-<p><b>Bài 6.</b> Tính bằng cách thuận tiện nhất:</p>
-<p>34 − 7 + 10 + 16 + 17 = <input id="tl10"></p>
-<p class="answer hidden">Đáp án đúng: 1114</p>
-</div>
-
-
 <div class="buttons">
+    <button id="generateBtn" class="generate-new" onclick="generateNewQuiz()">🧠 Tạo Bài Mới (AI)</button>
     <button id="submitBtn" class="submit" onclick="submitQuiz()">📝 Nộp bài</button>
     <button id="retryBtn" class="toggle hidden" onclick="retryWrong()">🔄 Làm lại câu sai</button>
+</div>
 
+<div id="loading">Đang tạo bài tập mới, vui lòng chờ...</div>
+
+<div id="quizContainer">
+    <!-- Nội dung quiz sẽ được chèn vào đây bởi JavaScript -->
+    <h2 id="mcTitle">I. Trắc nghiệm</h2>
+    <div id="multipleChoiceQuestions"></div>
+
+    <hr>
+
+    <h2 id="ftbTitle">II. Tự luận (điền đáp án)</h2>
+    <div id="fillInTheBlankQuestions"></div>
+</div>
 
 <h2 id="result"></h2>
 
 </div>
 
 <script>
-const answers = {
-    c1: "A",
-    c2: "C",
-    c3: "C",
-    c4: "B",
-    c5: "A",
-    c6: "C",
-    c7: "A",   // sửa
-    c8: "A",   // giữ nếu hình là 5 tam giác
+let currentAnswers = {};
+let wrongQuestions = [];
+const quizContainer = document.getElementById('quizContainer');
+const loadingIndicator = document.getElementById('loading');
+const submitBtn = document.getElementById('submitBtn');
+const retryBtn = document.getElementById('retryBtn');
 
-    tl1: "83",
-    tl2: "16",
-    tl3: "76",
-    tl4: "77",
-    tl5: "54",
-    tl6: "61",
-    tl7: "18",
-    tl8: "27",
-    tl9: "57",
-    tl10: "70"
+// --- Gemini API Configuration ---
+const apiKey = "";
+const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+// 1. Định nghĩa Schema cho kết quả JSON
+const quizSchema = {
+  type: "OBJECT",
+  properties: {
+    multipleChoice: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          id: { "type": "STRING", "description": "Tên biến (c1, c2, ...)" },
+          questionText: { "type": "STRING", "description": "Nội dung câu hỏi đã thay đổi số" },
+          options: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                label: { "type": "STRING", "description": "Văn bản hiển thị của đáp án (ví dụ: A. 68)" },
+                value: { "type": "STRING", "description": "Giá trị của đáp án (ví dụ: A)" }
+              },
+              "propertyOrdering": ["label", "value"]
+            }
+          },
+          correctAnswerValue: { "type": "STRING", "description": "Giá trị chữ cái của đáp án đúng (ví dụ: A, B, C...)" }
+        }
+      }
+    },
+    fillInTheBlank: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          id: { "type": "STRING", "description": "Tên biến (tl1, tl2, ...)" },
+          promptText: { "type": "STRING", "description": "Nội dung bài tập đã thay đổi số" },
+          correctAnswerValue: { "type": "STRING", "description": "Kết quả tính toán dưới dạng chuỗi" },
+          unit: { "type": "STRING", "description": "Đơn vị đi kèm nếu là bài toán có lời văn (ví dụ: quả, dm). Để trống nếu là phép tính." }
+        }
+      }
+    }
+  },
+  "propertyOrdering": ["multipleChoice", "fillInTheBlank"]
 };
 
+// 2. Định nghĩa nội dung Quiz gốc để AI dựa vào đó thay đổi
+const originalQuizContent = `
+<h2>I. Trắc nghiệm</h2>
+<div id="c1">Câu 1: 86 − 18 = ?</div>
+<div id="c2">Câu 2: 56 + 19 = ?</div>
+<div id="c3">Câu 3: Phép tính có hiệu bằng 16</div>
+<div id="c4">Câu 4: Phép tính nào có kết quả bé nhất?</div>
+<div id="c5">Câu 5: Nến dài 18cm, cháy hết 1dm còn bao nhiêu?</div>
+<div id="c6">Câu 6: 75 − 57 + … = 67</div>
+<div id="c7">Câu 7: 25dm − 18dm … 100cm − 35cm (So sánh)</div>
+<div id="c8">Câu 8: Số hình tam giác là? (Giữ nguyên câu này, chỉ thay đổi đáp án trắc nghiệm nếu cần)</div>
 
-let wrongQuestions = [];
+<hr>
 
+<h2>II. Tự luận (điền đáp án)</h2>
+
+<div id="tl1">Bài 1a: Đặt tính rồi tính: 47 + 36 = ?</div>
+<div id="tl2">Bài 1b: Đặt tính rồi tính: 72 − 56 = ?</div>
+<div id="tl3">Bài 1c: Đặt tính rồi tính: 81 − 5 = ?</div>
+<div id="tl4">Bài 1d: Đặt tính rồi tính: 100 − 23 = ?</div>
+<div id="tl5">Bài 2a: Tính: 51 − 15 + 18 = ?</div>
+<div id="tl6">Bài 2b: Tính: 80 − 36 + 17 = ?</div>
+<div id="tl7">Bài 3: Mẹ mua 3 chục trứng gà và 12 quả trứng vịt. Hỏi số trứng gà nhiều hơn số trứng vịt là bao nhiêu quả? (Đơn vị: quả)</div>
+<div id="tl8">Bài 4: Tấm vải xanh dài 18dm, tấm vải xanh ngắn hơn tấm vải đỏ 90cm. Hỏi tấm vải đỏ dài bao nhiêu đề-xi-mét? (Đơn vị: dm)</div>
+<div id="tl9">Bài 5: Tìm số có hai chữ số biết: Tổng hai chữ số bằng 12 và Chữ số hàng chục bé hơn chữ số hàng đơn vị là 2. (Kết quả là số có 2 chữ số)</div>
+<div id="tl10">Bài 6: Tính bằng cách thuận tiện nhất: 34 − 7 + 10 + 16 + 17 = ?</div>
+`;
+
+// 3. Hàm gọi API Gemini để tạo Quiz mới
+async function generateNewQuiz() {
+    loadingIndicator.style.display = 'block';
+    quizContainer.style.opacity = 0.5;
+    submitBtn.classList.add('hidden');
+    retryBtn.classList.add('hidden');
+    document.getElementById('result').innerText = '';
+
+    const systemPrompt = "Bạn là trợ lý giáo viên Toán lớp 2. Nhiệm vụ của bạn là nhận nội dung bài tập gốc, sau đó thay đổi NGẪU NHIÊN các số trong tất cả các câu hỏi (từ 2 chữ số trở lên, hoặc số chục/số đơn vị trong bài toán có lời văn, trừ câu hỏi hình học) và TÍNH TOÁN KẾT QUẢ ĐÚNG cho các câu hỏi đã thay đổi. Đảm bảo các phép tính cộng/trừ/so sánh trong phần trắc nghiệm có kết quả phù hợp với các đáp án nhiễu (A, B, C...). TRẢ LẠI KẾT QUẢ DƯỚI DẠNG JSON THEO SCHEMA ĐÃ ĐỊNH NGHĨA.";
+
+    const userQuery = "Hãy tạo một bộ đề mới dựa trên cấu trúc bài tập sau. Hãy thay đổi các số ngẫu nhiên nhưng phải giữ nguyên cấu trúc câu hỏi và tính toán kết quả chính xác cho các số mới. Đặc biệt, hãy thay đổi các số trong các bài tập có lời văn (Bài 3, Bài 4) để chúng khác biệt so với đề gốc. Các số mới phải là số nguyên dương và phù hợp với cấp độ lớp 2. Nội dung bài tập gốc: \n\n" + originalQuizContent;
+
+    const payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: quizSchema
+        }
+    };
+
+    let responseJson;
+    let attempts = 0;
+    const maxAttempts = 5;
+    const baseDelay = 1000;
+
+    while (attempts < maxAttempts) {
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                if (response.status === 429) { // Too Many Requests
+                    throw new Error("Rate limit exceeded.");
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.candidates && result.candidates.length > 0) {
+                const jsonText = result.candidates[0].content.parts[0].text;
+                responseJson = JSON.parse(jsonText);
+                break; // Thành công, thoát vòng lặp
+            } else {
+                throw new Error("API returned an empty or malformed response.");
+            }
+
+        } catch (error) {
+            attempts++;
+            if (attempts >= maxAttempts) {
+                console.error("Lỗi khi gọi API sau nhiều lần thử:", error.message);
+                document.getElementById('result').innerText = "❌ Lỗi: Không thể tạo bài mới. Vui lòng thử lại sau.";
+                break;
+            }
+            const delay = baseDelay * Math.pow(2, attempts - 1) + Math.floor(Math.random() * 1000);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            // Không log lỗi ra console trong khi thử lại (yêu cầu từ hướng dẫn)
+        }
+    }
+
+    loadingIndicator.style.display = 'none';
+    quizContainer.style.opacity = 1;
+    submitBtn.classList.remove('hidden');
+
+    if (responseJson) {
+        updateQuizUI(responseJson);
+    }
+}
+
+// 4. Hàm cập nhật giao diện người dùng
+function updateQuizUI(newQuizData) {
+    const mcContainer = document.getElementById('multipleChoiceQuestions');
+    const ftbContainer = document.getElementById('fillInTheBlankQuestions');
+    
+    // Xóa nội dung cũ
+    mcContainer.innerHTML = '';
+    ftbContainer.innerHTML = '';
+    currentAnswers = {};
+
+    // Cập nhật Trắc nghiệm
+    newQuizData.multipleChoice.forEach((q, index) => {
+        currentAnswers[q.id] = q.correctAnswerValue;
+
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question-group';
+        qDiv.innerHTML = `
+            <p>Câu ${index + 1}: ${q.questionText}</p>
+            <div class="options" id="options-${q.id}">
+                ${q.options.map(opt => `
+                    <label>
+                        <input type="radio" name="${q.id}" value="${opt.value}"> ${opt.label}
+                    </label>
+                `).join('')}
+            </div>
+            <p class="answer hidden" id="answer-${q.id}"></p>
+        `;
+        mcContainer.appendChild(qDiv);
+    });
+
+    // Cập nhật Tự luận (Điền đáp án)
+    newQuizData.fillInTheBlank.forEach((q, index) => {
+        currentAnswers[q.id] = q.correctAnswerValue;
+        
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question-group';
+        
+        let unitText = q.unit ? ` ${q.unit}` : '';
+        let inputUnitDisplay = q.unit ? `${unitText}` : '';
+        
+        let questionContent;
+        if (q.id === 'tl7' || q.id === 'tl8') {
+             // Bài toán có lời văn - Bài 3 và 4
+            questionContent = `<p><b>Bài ${index + 1}.</b><br>${q.promptText}</p>
+                <p>Đáp án: <input type="text" id="${q.id}"> ${inputUnitDisplay}</p>`;
+        } else if (q.id === 'tl9') {
+             // Bài 5: Tìm số
+            questionContent = `<p><b>Bài 5.</b><br>${q.promptText}</p>
+                <p>Đáp án: <input type="text" id="${q.id}"></p>`;
+        }
+        else {
+             // Phép tính đơn giản - Bài 1 và 2
+            questionContent = `<p><b>Bài ${index + 1}.</b> ${q.promptText.replace('?', '')} <input type="text" id="${q.id}"></p>`;
+        }
+
+        qDiv.innerHTML = questionContent + `<p class="answer hidden" id="answer-${q.id}"></p>`;
+        ftbContainer.appendChild(qDiv);
+    });
+
+    document.getElementById('result').innerText = "✅ Đã tạo bộ đề mới thành công!";
+}
+
+// 5. Hàm kiểm tra Quiz (giữ nguyên logic gốc, nhưng dùng currentAnswers)
 function submitQuiz() {
     let score = 0;
-    let total = Object.keys(answers).length;
+    let total = Object.keys(currentAnswers).length;
     wrongQuestions = [];
 
-    for (let key in answers) {
+    if (total === 0) {
+        document.getElementById("result").innerText = "Chưa có bài tập, vui lòng nhấn 'Tạo Bài Mới'.";
+        return;
+    }
+
+    for (let key in currentAnswers) {
         let isCorrect = false;
-        let question;
+        let questionGroup;
 
         if (key.startsWith("c")) {
             let checked = document.querySelector(`input[name="${key}"]:checked`);
-            question = document.querySelector(`input[name="${key}"]`)?.closest(".question");
-            if (checked && checked.value === answers[key]) isCorrect = true;
+            questionGroup = document.querySelector(`input[name="${key}"]`)?.closest(".question-group");
+            if (checked && checked.value === currentAnswers[key]) isCorrect = true;
         } else {
             let input = document.getElementById(key);
-            question = input?.closest(".question");
-            if (input && input.value.trim() === answers[key]) isCorrect = true;
+            questionGroup = input?.closest(".question-group");
+            // Chuẩn hóa input value: loại bỏ khoảng trắng
+            if (input && input.value.trim() === currentAnswers[key].trim()) isCorrect = true;
         }
 
-        let answerText = question.querySelector(".answer");
+        const answerText = questionGroup.querySelector(".answer");
         answerText.classList.remove("hidden");
 
         // Xóa màu cũ nếu có
-        question.classList.remove("correct", "wrong", "locked");
+        questionGroup.classList.remove("correct", "wrong", "locked");
 
         if (isCorrect) {
             score++;
             answerText.style.color = "green";
             answerText.innerText = "✅ Con làm đúng";
-            question.classList.add("correct", "locked");
+            questionGroup.classList.add("correct", "locked");
         } else {
             answerText.style.color = "red";
-            answerText.innerText = "❌ Sai – Đáp án đúng: " + answers[key];
-            question.classList.add("wrong");
+            answerText.innerText = "❌ Sai – Đáp án đúng: " + currentAnswers[key];
+            questionGroup.classList.add("wrong");
             wrongQuestions.push(key);
         }
     }
@@ -351,24 +470,28 @@ function submitQuiz() {
         `🎉 Con làm đúng ${score}/${total} câu 🎉`;
 
     document.getElementById("submitBtn").classList.add("hidden");
-    document.getElementById("retryBtn").classList.remove("hidden");
+    if (wrongQuestions.length > 0) {
+        document.getElementById("retryBtn").classList.remove("hidden");
+    }
 }
 
+// 6. Hàm làm lại câu sai (giữ nguyên logic gốc)
 function retryWrong() {
     wrongQuestions.forEach(key => {
-        let question;
+        let questionGroup;
 
         if (key.startsWith("c")) {
             document.querySelectorAll(`input[name="${key}"]`).forEach(r => r.checked = false);
-            question = document.querySelector(`input[name="${key}"]`).closest(".question");
+            questionGroup = document.querySelector(`input[name="${key}"]`).closest(".question-group");
         } else {
             let input = document.getElementById(key);
             input.value = "";
-            question = input.closest(".question");
+            questionGroup = input.closest(".question-group");
         }
 
-        question.classList.remove("wrong");
-        question.querySelector(".answer").classList.add("hidden");
+        questionGroup.classList.remove("wrong");
+        questionGroup.classList.remove("locked");
+        questionGroup.querySelector(".answer").classList.add("hidden");
     });
 
     document.getElementById("result").innerText =
@@ -377,9 +500,13 @@ function retryWrong() {
     document.getElementById("submitBtn").classList.remove("hidden");
     document.getElementById("retryBtn").classList.add("hidden");
 }
+
+// Tự động tạo bài mới khi trang tải xong
+window.onload = function() {
+    generateNewQuiz();
+};
+
 </script>
-
-
 
 </body>
 </html>
