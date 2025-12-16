@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Bài tập Toán lớp 2</title>
+
+<style>
+body {
+    font-family: "Comic Sans MS", Arial, sans-serif;
+    background: linear-gradient(135deg, #e3f2fd, #fff);
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+h1 {
+    text-align: center;
+    color: #1e88e5;
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+h2 {
+    color: #fb8c00;
+    margin-top: 30px;
+    font-size: 28px;
+}
+
+.question {
+    background: #f9fbff;
+    border-radius: 18px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    border-left: 8px solid #42a5f5;
+}
+
+.question p {
+    font-size: 20px;
+}
+
+.options label {
+    display: block;
+    font-size: 18px;
+    margin-left: 20px;
+    padding: 6px;
+    cursor: pointer;
+}
+
+.options input {
+    transform: scale(1.3);
+    margin-right: 8px;
+}
+
+input[type="text"] {
+    font-size: 18px;
+    padding: 6px 10px;
+    width: 140px;
+    border-radius: 10px;
+    border: 2px solid #90caf9;
+}
+
+.answer {
+    color: green;
+    font-style: italic;
+    font-size: 18px;
+}
+
+.hidden {
+    display: none;
+}
+
+.buttons {
+    text-align: center;
+    margin-top: 30px;
+}
+
+button {
+    font-size: 20px;
+    padding: 12px 28px;
+    margin: 10px;
+    border-radius: 18px;
+    border: none;
+    cursor: pointer;
+}
+
+.submit {
+    background: #1e88e5;
+    color: white;
+}
+
+.toggle {
+    background: #f9a825;
+    color: white;
+}
+
+#result {
+    text-align: center;
+    font-size: 28px;
+    color: #d32f2f;
+    margin-top: 25px;
+}
+.correct {
+    background: #e8f5e9;
+    border-left: 8px solid #43a047;
+}
+
+.wrong {
+    background: #ffebee;
+    border-left: 8px solid #e53935;
+}
+
+.locked input {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📘 BÀI TẬP TOÁN LỚP 2 📘</h1>
+
+<h2>I. Trắc nghiệm</h2>
+
+<div class="question">
+<p>Câu 1: 86 − 18 = ?</p>
+<label><input type="radio" name="c1" value="A"> A. 68</label>
+<label><input type="radio" name="c1" value="B"> B. 86</label>
+<label><input type="radio" name="c1" value="C"> C. 18</label>
+<p class="answer hidden">Đáp án đúng: A</p>
+</div>
+
+<div class="question">
+<p>Câu 2: 56 + 19 = ?</p>
+<label><input type="radio" name="c2" value="A"> A. 65</label>
+<label><input type="radio" name="c2" value="B"> B. 37</label>
+<label><input type="radio" name="c2" value="C"> C. 75</label>
+<p class="answer hidden">Đáp án đúng: C</p>
+</div>
+
+<div class="question">
+<p>Câu 3: Phép tính có hiệu bằng 16</p>
+<label><input type="radio" name="c3" value="A"> A. 76 − 40</label>
+<label><input type="radio" name="c3" value="B"> B. 8 + 8</label>
+<label><input type="radio" name="c3" value="C"> C. 54 − 38</label>
+<p class="answer hidden">Đáp án đúng: C</p>
+</div>
+
+<div class="question">
+<p>Câu 4: Phép tính nào có kết quả bé nhất?</p>
+<label><input type="radio" name="c4" value="A"> A. 75 − 38</label>
+<label><input type="radio" name="c4" value="B"> B. 84 − 48</label>
+<label><input type="radio" name="c4" value="C"> C. 55 + 16</label>
+<label><input type="radio" name="c4" value="D"> D. 35 + 17</label>
+<p class="answer hidden">Đáp án đúng: B</p>
+</div>
+
+<div class="question">
+<p>Câu 5: Nến dài 18cm, cháy hết 1dm còn bao nhiêu?</p>
+<label><input type="radio" name="c5" value="A"> A. 8cm</label>
+<label><input type="radio" name="c5" value="B"> B. 8dm</label>
+<label><input type="radio" name="c5" value="C"> C. 10cm</label>
+<label><input type="radio" name="c5" value="D"> D. 1dm</label>
+<p class="answer hidden">Đáp án đúng: A</p>
+</div>
+
+<div class="question">
+<p>Câu 6: 75 − 57 + … = 67</p>
+<label><input type="radio" name="c6" value="A"> A. 39</label>
+<label><input type="radio" name="c6" value="B"> B. 48</label>
+<label><input type="radio" name="c6" value="C"> C. 49</label>
+<p class="answer hidden">Đáp án đúng: C</p>
+</div>
+
+<div class="question">
+<p>Câu 7: 25dm − 18dm … 100cm − 35cm</p>
+<label><input type="radio" name="c7" value="A"> A. ></label>
+<label><input type="radio" name="c7" value="B"> B. <</label>
+<label><input type="radio" name="c7" value="C"> C. =</label>
+<label><input type="radio" name="c7" value="D"> D. Không có dấu</label>
+<p class="answer hidden">Đáp án đúng: B</p>
+</div>
+
+<div class="question">
+<p>Câu 8: Số hình tam giác là?</p>
+<label><input type="radio" name="c8" value="A"> A. 5</label>
+<label><input type="radio" name="c8" value="B"> B. 6</label>
+<label><input type="radio" name="c8" value="C"> C. 7</label>
+<label><input type="radio" name="c8" value="D"> D. 4</label>
+<p class="answer hidden">Đáp án đúng: A</p>
+</div>
+
+<hr>
+<!-- DÁN NGUYÊN PHẦN TRẮC NGHIỆM CỦA BẠN Ở ĐÂY -->
+<!-- (Không thay đổi nội dung, chỉ hưởng giao diện) -->
+
+<hr>
+
+<h2>II. Tự luận (điền đáp án)</h2>
+
+<div class="question">
+<p><b>Bài 1.</b> Đặt tính rồi tính:</p>
+<div class="question">
+<p>47 + 36 = <input id="tl1"></p>
+<p class="answer hidden">Đáp án đúng: 1111</p>
+</div>
+<div class="question">
+<p>72 − 56 = <input id="tl2"></p>
+<p class="answer hidden">Đáp án đúng: 12</p>
+</div>
+<div class="question">
+<p>81 − 5 = <input id="tl3"></p>
+<p class="answer hidden">Đáp án đúng: 13</p>
+</div>
+<div class="question">
+<p>100 − 23 = <input id="tl4"></p>
+<p class="answer hidden">Đáp án đúng: 14</p>
+</div>
+</div>
+<div class="question">
+<p><b>Bài 2.</b> Tính:</p>
+<div class="question">
+<p>51 − 15 + 18 = <input id="tl5"></p>
+<p class="answer hidden">Đáp án đúng: 14</p>
+</div>
+<div class="question">
+<p>80 − 36 + 17 = <input id="tl6"></p>
+<p class="answer hidden">Đáp án đúng: 114</p>
+</div>
+</div>
+
+<div class="question">
+<p><b>Bài 3.</b><br>
+Mẹ mua <b>3 chục trứng gà</b> và <b>12 quả trứng vịt</b>.<br>
+Hỏi số trứng gà nhiều hơn số trứng vịt là bao nhiêu quả?</p>
+<p>Đáp án: <input id="tl7"> quả</p>
+<p class="answer hidden">Đáp án đúng: 4114</p>
+</div>
+
+<div class="question">
+<p><b>Bài 4.</b><br>
+Tấm vải xanh dài <b>18dm</b>, tấm vải xanh ngắn hơn tấm vải đỏ <b>90cm</b>.<br>
+Hỏi tấm vải đỏ dài bao nhiêu đề-xi-mét?</p>
+<p>Đáp án: <input id="tl8"> dm</p>
+<p class="answer hidden">Đáp án đúng: 3114</p>
+</div>
+
+<div class="question">
+<p><b>Bài 5.</b><br>
+Tìm số có hai chữ số biết:</p>
+<ul style="font-size:18px">
+<li>Tổng hai chữ số bằng 12</li>
+<li>Chữ số hàng chục bé hơn chữ số hàng đơn vị là 2</li>
+</ul>
+<p>Đáp án: <input id="tl9"></p>
+<p class="answer hidden">Đáp án đúng: 57</p>
+</div>
+
+<div class="question">
+<p><b>Bài 6.</b> Tính bằng cách thuận tiện nhất:</p>
+<p>34 − 7 + 10 + 16 + 17 = <input id="tl10"></p>
+<p class="answer hidden">Đáp án đúng: 1114</p>
+</div>
+
+
+<div class="buttons">
+    <button id="submitBtn" class="submit" onclick="submitQuiz()">📝 Nộp bài</button>
+    <button id="retryBtn" class="toggle hidden" onclick="retryWrong()">🔄 Làm lại câu sai</button>
+
+
+<h2 id="result"></h2>
+
+</div>
+
+<script>
+const answers = {
+    c1: "A",
+    c2: "C",
+    c3: "C",
+    c4: "B",
+    c5: "A",
+    c6: "C",
+    c7: "A",   // sửa
+    c8: "A",   // giữ nếu hình là 5 tam giác
+
+    tl1: "83",
+    tl2: "16",
+    tl3: "76",
+    tl4: "77",
+    tl5: "54",
+    tl6: "61",
+    tl7: "18",
+    tl8: "27",
+    tl9: "57",
+    tl10: "70"
+};
+
+
+let wrongQuestions = [];
+
+function submitQuiz() {
+    let score = 0;
+    let total = Object.keys(answers).length;
+    wrongQuestions = [];
+
+    for (let key in answers) {
+        let isCorrect = false;
+        let question;
+
+        if (key.startsWith("c")) {
+            let checked = document.querySelector(`input[name="${key}"]:checked`);
+            question = document.querySelector(`input[name="${key}"]`)?.closest(".question");
+            if (checked && checked.value === answers[key]) isCorrect = true;
+        } else {
+            let input = document.getElementById(key);
+            question = input?.closest(".question");
+            if (input && input.value.trim() === answers[key]) isCorrect = true;
+        }
+
+        let answerText = question.querySelector(".answer");
+        answerText.classList.remove("hidden");
+
+        // Xóa màu cũ nếu có
+        question.classList.remove("correct", "wrong", "locked");
+
+        if (isCorrect) {
+            score++;
+            answerText.style.color = "green";
+            answerText.innerText = "✅ Con làm đúng";
+            question.classList.add("correct", "locked");
+        } else {
+            answerText.style.color = "red";
+            answerText.innerText = "❌ Sai – Đáp án đúng: " + answers[key];
+            question.classList.add("wrong");
+            wrongQuestions.push(key);
+        }
+    }
+
+    document.getElementById("result").innerText =
+        `🎉 Con làm đúng ${score}/${total} câu 🎉`;
+
+    document.getElementById("submitBtn").classList.add("hidden");
+    document.getElementById("retryBtn").classList.remove("hidden");
+}
+
+function retryWrong() {
+    wrongQuestions.forEach(key => {
+        let question;
+
+        if (key.startsWith("c")) {
+            document.querySelectorAll(`input[name="${key}"]`).forEach(r => r.checked = false);
+            question = document.querySelector(`input[name="${key}"]`).closest(".question");
+        } else {
+            let input = document.getElementById(key);
+            input.value = "";
+            question = input.closest(".question");
+        }
+
+        question.classList.remove("wrong");
+        question.querySelector(".answer").classList.add("hidden");
+    });
+
+    document.getElementById("result").innerText =
+        "🔁 Con hãy làm lại các câu sai nhé!";
+
+    document.getElementById("submitBtn").classList.remove("hidden");
+    document.getElementById("retryBtn").classList.add("hidden");
+}
+</script>
+
+
+
+</body>
+</html>
