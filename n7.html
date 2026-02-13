@@ -70,45 +70,20 @@
             border: 1px solid #e0e0e0;
         }
 
-        /* Styles for vertical math problem display */
-        .math-problem-vertical {
+        /* Styles for horizontal math problem display */
+        .math-problem-horizontal {
             display: flex;
-            flex-direction: column;
-            align-items: flex-end; /* Align numbers to the right */
-            padding-right: 10px; /* Small padding for alignment */
-            font-size: 1em; /* Inherit from question-area, then scale digits */
+            align-items: center;
+            justify-content: center;
+            font-size: 1em; /* Inherit from question-area */
             font-weight: bold;
             color: #34495e;
             width: 100%; /* Take full width */
             box-sizing: border-box;
         }
 
-        .math-row-num {
-            display: flex;
-            justify-content: flex-end; /* Align digits within the row to the right */
-            width: 100%;
-            margin-bottom: 5px; /* Space between rows */
-            margin-right: 50%;
-        }
-
-        .math-operator {
-            margin-right: 10px; /* Space between operator and number */
-            font-size: 1.2em; /* Slightly larger operator */
-        }
-
-        .digit-tens, .digit-units {
-            min-width: 0.8em; /* Ensure consistent width for digits */
-            text-align: center;
-            font-size: 1.2em; /* Scale digits for better visibility */
-        }
-
-        .math-line {
-            width: calc(100% - 30px); /* Adjust width to match numbers, considering operator space */
-            height: 3px;
-            background-color: #34495e;
-            margin-top: 5px;
-            margin-left: auto; /* Push line to the right */
-            margin-right: 0;
+        .math-problem-horizontal span {
+            margin: 0 10px; /* Space between numbers and operator */
         }
 
         .input-area {
@@ -131,7 +106,7 @@
             border: 2px solid #a7d9f2;
             border-radius: 8px;
             font-size: 1.5em;
-            width: 60px; /* Smaller width for single digit */
+            width: 120px; /* Wider width for single input */
             text-align: center;
             transition: border-color 0.3s ease;
         }
@@ -300,7 +275,7 @@
             }
             .answer-digit-input {
                 font-size: 1.2em;
-                width: 50px;
+                width: 80px; /* Adjusted width for single input on mobile */
             }
             .btn {
                 padding: 10px 20px;
@@ -336,13 +311,12 @@
         </div>
 
         <div class="question-area" id="questionArea">
-            <!-- Câu hỏi sẽ hiển thị ở đây theo cột dọc -->
+            <!-- Câu hỏi sẽ hiển thị ở đây theo hàng ngang -->
         </div>
 
         <div class="input-area">
             <div class="answer-inputs">
-                <input type="text" id="tensInput" class="answer-digit-input" placeholder="" maxlength="1" inputmode="numeric">
-                <input type="text" id="unitsInput" class="answer-digit-input" placeholder="" maxlength="1" inputmode="numeric">
+                <input type="text" id="answerInput" class="answer-digit-input" placeholder="" maxlength="2" inputmode="numeric">
             </div>
             <button class="btn" id="submitBtn">Kiểm Tra</button>
             <button class="btn" id="nextBtn" style="display: none;">Câu Kế Tiếp</button>
@@ -370,8 +344,7 @@
 
     <script>
         const questionArea = document.getElementById('questionArea');
-        const tensInput = document.getElementById('tensInput'); // New tens input
-        const unitsInput = document.getElementById('unitsInput'); // New units input
+        const answerInput = document.getElementById('answerInput'); // Đã thay đổi thành một ô nhập liệu
         const submitBtn = document.getElementById('submitBtn');
         const nextBtn = document.getElementById('nextBtn');
         const feedbackDiv = document.getElementById('feedback');
@@ -380,116 +353,79 @@
         const roadCanvas = document.getElementById('roadCanvas');
         const ctx = roadCanvas.getContext('2d');
 
-        // Popup elements
+        // Các phần tử Popup
         const victoryPopup = document.getElementById('victoryPopup');
         const popupMessage = document.getElementById('popupMessage');
         const popupCorrectCount = document.getElementById('popupCorrectCount');
         const popupIncorrectCount = document.getElementById('popupIncorrectCount');
         const popupRestartBtn = document.getElementById('popupRestartBtn');
 
-
         let currentQuestion = {};
         let correctAnswers = 0;
         let incorrectAnswers = 0;
-        const maxRoadLength = 30; // Number of correct answers to "complete" the visible road
-        const markerInterval = 2; // Place a marker every X correct answers
+        const maxRoadLength = 30; // Số câu trả lời đúng để "hoàn thành" con đường
+        const markerInterval = 2; // Đặt một điểm đánh dấu sau mỗi X câu trả lời đúng
 
-        // Function to generate a random number within a range
+        // Hàm tạo số ngẫu nhiên trong một phạm vi
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // Function to generate an addition problem with carrying
-        function generateAdditionProblem() {
-            let num1, num2, sum;
-            do {
-                num1 = getRandomInt(10, 99); // Ensure two-digit numbers for carrying
-                num2 = getRandomInt(10, 99);
-                sum = num1 + num2;
-            } while (sum >= 100 || sum < 10 || (num1 % 10) + (num2 % 10) < 10); // Ensure carrying and sum within 10-99
+        // Hàm tạo phép nhân trong bảng cửu chương 5
+        function generateMultiplicationProblem() {
+            const num1 = 7; // Luôn là số 5
+            // const num1 = getRandomInt(1, 2); // Số thứ hai từ 1 đến 10
+            const num2 = getRandomInt(1, 10); // Số thứ hai từ 1 đến 10
+            const product = num1 * num2;
 
             return {
-                question: `${num1} + ${num2} = ?`,
+                question: `${num1} x ${num2} = ?`,
                 num1: num1,
                 num2: num2,
-                operator: '+',
-                answer: sum
+                operator: 'x',
+                answer: product
             };
         }
 
-        // Function to generate a subtraction problem with borrowing
-        function generateSubtractionProblem() {
-            let num1, num2, diff;
-            do {
-                num1 = getRandomInt(20, 99); // Ensure num1 is large enough for borrowing and result < 100
-                num2 = getRandomInt(10, num1 - 1); // Ensure num2 is smaller than num1 and result is positive
-                diff = num1 - num2;
-            } while (diff < 0 || diff >= 100 || (num1 % 10) < (num2 % 10)); // Ensure borrowing and diff within 0-99
-
-            return {
-                question: `${num1} - ${num2} = ?`,
-                num1: num1,
-                num2: num2,
-                operator: '-',
-                answer: diff
-            };
-        }
-
-        // Function to generate a new question (randomly addition or subtraction)
+        // Hàm tạo câu hỏi mới
         function generateNewQuestion() {
-            const operationType = Math.random() < 0.5 ? 'add' : 'subtract';
-            if (operationType === 'add') {
-                currentQuestion = generateAdditionProblem();
-            } else {
-                currentQuestion = generateSubtractionProblem();
-            }
+            currentQuestion = generateMultiplicationProblem();
 
-            // Display question in vertical format
-            const num1Tens = Math.floor(currentQuestion.num1 / 10);
-            const num1Units = currentQuestion.num1 % 10;
-            const num2Tens = Math.floor(currentQuestion.num2 / 10);
-            const num2Units = currentQuestion.num2 % 10;
-
+            // Hiển thị câu hỏi theo định dạng hàng ngang
             questionArea.innerHTML = `
-                <div class="math-problem-vertical">
-                    <div class="math-row-num">
-                        <span class="digit-tens">${num1Tens === 0 ? '' : num1Tens}</span><span class="digit-units">${num1Units}</span>
-                    </div>
-                    <div class="math-row-num">
-                        <span class="math-operator">${currentQuestion.operator}</span>
-                        <span class="digit-tens">${num2Tens === 0 ? '' : num2Tens}</span><span class="digit-units">${num2Units}</span>
-                    </div>
-                    <div class="math-line"></div>
+                <div class="math-problem-horizontal">
+                    <span>${currentQuestion.num1}</span>
+                    <span>${currentQuestion.operator}</span>
+                    <span>${currentQuestion.num2}</span>
+                    <span>= ?</span>
                 </div>
             `;
 
-            tensInput.value = '';
-            unitsInput.value = '';
+            answerInput.value = ''; // Xóa giá trị của ô nhập liệu duy nhất
             feedbackDiv.textContent = '';
-            feedbackDiv.className = ''; // Clear feedback styles
+            feedbackDiv.className = ''; // Xóa kiểu phản hồi
             submitBtn.style.display = 'inline-block';
             nextBtn.style.display = 'none';
-            tensInput.disabled = false; // Enable input
-            unitsInput.disabled = false; // Enable input
-            tensInput.focus(); // Focus on tens input at start of new question
+            answerInput.disabled = false; // Bật input
+            answerInput.focus(); // Tập trung vào input khi bắt đầu câu hỏi mới
         }
 
-        // Function to draw the road
+        // Hàm vẽ con đường
         function drawRoad() {
-            const roadWidth = Math.max(roadCanvas.parentElement.clientWidth, correctAnswers * (roadCanvas.parentElement.clientWidth / maxRoadLength) + 300); // Road extends as progress increases
-            roadCanvas.width = roadWidth; // Adjust canvas width dynamically
-            roadCanvas.height = 80; // Fixed height for the road
+            const roadWidth = Math.max(roadCanvas.parentElement.clientWidth, correctAnswers * (roadCanvas.parentElement.clientWidth / maxRoadLength) + 300); // Con đường mở rộng khi tiến độ tăng
+            roadCanvas.width = roadWidth; // Điều chỉnh chiều rộng canvas động
+            roadCanvas.height = 80; // Chiều cao cố định cho con đường
 
             ctx.clearRect(0, 0, roadCanvas.width, roadCanvas.height);
 
-            // Draw road background
-            ctx.fillStyle = '#6c757d'; // Dark grey
+            // Vẽ nền đường
+            ctx.fillStyle = '#6c757d'; // Xám đậm
             ctx.fillRect(0, 0, roadCanvas.width, roadCanvas.height);
 
-            // Draw road lines
-            ctx.strokeStyle = '#f8f9fa'; // Light grey/white for lines
+            // Vẽ vạch đường
+            ctx.strokeStyle = '#f8f9fa'; // Xám nhạt/trắng cho vạch
             ctx.lineWidth = 4;
-            const lineDash = [20, 20]; // Dash length, space length
+            const lineDash = [20, 20]; // Độ dài vạch, độ dài khoảng trống
             const lineY = roadCanvas.height / 2;
 
             for (let i = 0; i < roadCanvas.width; i += lineDash[0] + lineDash[1]) {
@@ -499,35 +435,35 @@
                 ctx.stroke();
             }
 
-            // Draw markers based on correct answers
-            ctx.fillStyle = '#ffc107'; // Yellow for markers
-            ctx.strokeStyle = '#dc3545'; // Red border for markers
+            // Vẽ các điểm đánh dấu dựa trên số câu trả lời đúng
+            ctx.fillStyle = '#ffc107'; // Vàng cho điểm đánh dấu
+            ctx.strokeStyle = '#dc3545'; // Viền đỏ cho điểm đánh dấu
             ctx.lineWidth = 2;
 
             for (let i = 0; i <= correctAnswers; i += markerInterval) {
-                if (i === 0 && correctAnswers === 0) { // Always show start marker
-                    drawMarker(20, 'Bắt đầu'); // Start marker slightly offset
+                if (i === 0 && correctAnswers === 0) { // Luôn hiển thị điểm bắt đầu
+                    drawMarker(20, 'Bắt đầu'); // Điểm bắt đầu hơi lệch
                 } else if (i > 0) {
                     const markerX = (i / maxRoadLength) * roadCanvas.width;
                     drawMarker(markerX, `${i} điểm`);
                 }
             }
 
-            // Draw current progress marker (car/player)
+            // Vẽ điểm đánh dấu tiến độ hiện tại (xe/người chơi)
             const playerX = (correctAnswers / maxRoadLength) * roadCanvas.width;
             drawPlayer(playerX);
         }
 
-        // Function to draw a single star marker
+        // Hàm vẽ một điểm đánh dấu ngôi sao
         function drawMarker(x, text) {
-            const markerSize = 25; // Larger star
+            const markerSize = 25; // Ngôi sao lớn hơn
             const numPoints = 5;
             const outerRadius = markerSize / 2;
-            const innerRadius = outerRadius / 2.5; // Make inner radius smaller for sharper points
+            const innerRadius = outerRadius / 2.5; // Làm bán kính bên trong nhỏ hơn để các điểm sắc nét hơn
 
-            ctx.save(); // Save the current canvas state
-            ctx.translate(x, roadCanvas.height / 2); // Move origin to marker center
-            ctx.rotate(Math.PI / 10); // Rotate slightly to make one point face up
+            ctx.save(); // Lưu trạng thái canvas hiện tại
+            ctx.translate(x, roadCanvas.height / 2); // Di chuyển gốc đến tâm điểm đánh dấu
+            ctx.rotate(Math.PI / 10); // Xoay nhẹ để một điểm hướng lên
 
             ctx.beginPath();
             for (let i = 0; i < numPoints; i++) {
@@ -538,10 +474,10 @@
             }
             ctx.closePath();
 
-            ctx.fillStyle = '#FFD700'; // Gold color for stars
-            ctx.strokeStyle = '#DAA520'; // Darker gold border
+            ctx.fillStyle = '#FFD700'; // Màu vàng kim cho ngôi sao
+            ctx.strokeStyle = '#DAA520'; // Viền vàng đậm hơn
             ctx.lineWidth = 2;
-            ctx.shadowColor = 'rgba(255, 215, 0, 0.5)'; // Yellow glow
+            ctx.shadowColor = 'rgba(255, 215, 0, 0.5)'; // Ánh sáng vàng
             ctx.shadowBlur = 10;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
@@ -549,41 +485,41 @@
             ctx.fill();
             ctx.stroke();
 
-            ctx.restore(); // Restore canvas state
+            ctx.restore(); // Khôi phục trạng thái canvas
 
-            ctx.fillStyle = '#212529'; // Dark text
-            ctx.font = '14px Inter'; // Slightly larger font for text
+            ctx.fillStyle = '#212529'; // Chữ màu tối
+            ctx.font = '14px Inter'; // Phông chữ lớn hơn một chút cho văn bản
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(text, x, roadCanvas.height / 2 + markerSize + 5);
         }
 
-        // Function to draw a cute car icon
+        // Hàm vẽ biểu tượng xe dễ thương
         function drawPlayer(x) {
             const playerWidth = 40;
             const playerHeight = 30;
-            const playerY = roadCanvas.height / 2 - playerHeight - 5; // Position above the road line, slightly higher
+            const playerY = roadCanvas.height / 2 - playerHeight - 5; // Vị trí phía trên vạch đường, hơi cao hơn
 
-            ctx.fillStyle = '#FF6347'; // Tomato red for a playful car
-            ctx.strokeStyle = '#CD5C5C'; // Indian red border
+            ctx.fillStyle = '#FF6347'; // Màu đỏ cà chua cho chiếc xe vui nhộn
+            ctx.strokeStyle = '#CD5C5C'; // Viền màu đỏ Ấn Độ
             ctx.lineWidth = 2;
 
-            // Car body (rounded rectangle)
+            // Thân xe (hình chữ nhật bo tròn)
             ctx.beginPath();
-            ctx.roundRect(x - playerWidth / 2, playerY, playerWidth, playerHeight, 8); // More rounded corners
+            ctx.roundRect(x - playerWidth / 2, playerY, playerWidth, playerHeight, 8); // Bo tròn nhiều hơn
             ctx.fill();
             ctx.stroke();
 
-            // Cabin (smaller rounded rectangle on top)
-            ctx.fillStyle = '#ADD8E6'; // Light blue for window
-            ctx.strokeStyle = '#6A5ACD'; // Slate blue border
+            // Cabin (hình chữ nhật bo tròn nhỏ hơn ở trên)
+            ctx.fillStyle = '#ADD8E6'; // Màu xanh nhạt cho cửa sổ
+            ctx.strokeStyle = '#6A5ACD'; // Viền màu xanh đá
             ctx.beginPath();
             ctx.roundRect(x - playerWidth * 0.3, playerY - playerHeight * 0.4, playerWidth * 0.6, playerHeight * 0.6, 5);
             ctx.fill();
             ctx.stroke();
 
-            // Wheels
-            ctx.fillStyle = '#343a40'; // Dark grey for wheels
+            // Bánh xe
+            ctx.fillStyle = '#343a40'; // Xám đậm cho bánh xe
             ctx.strokeStyle = '#212529';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -595,8 +531,8 @@
             ctx.fill();
             ctx.stroke();
 
-            // Headlights (small yellow circles)
-            ctx.fillStyle = '#FFD700'; // Gold for headlights
+            // Đèn pha (hình tròn nhỏ màu vàng)
+            ctx.fillStyle = '#FFD700'; // Vàng kim cho đèn pha
             ctx.beginPath();
             ctx.arc(x - playerWidth * 0.4, playerY + playerHeight * 0.7, 3, 0, Math.PI * 2);
             ctx.fill();
@@ -605,20 +541,13 @@
             ctx.fill();
         }
 
-
-        // Event listener for submit button
+        // Trình xử lý sự kiện cho nút kiểm tra
         submitBtn.addEventListener('click', () => {
             checkAnswer();
         });
 
-        // Event listener for Enter key on input fields
-        tensInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                unitsInput.focus(); // Move to units input on Enter in tens
-            }
-        });
-
-        unitsInput.addEventListener('keypress', (e) => {
+        // Trình xử lý sự kiện cho phím Enter trên trường nhập liệu
+        answerInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 if (submitBtn.style.display !== 'none') {
                     checkAnswer();
@@ -628,132 +557,92 @@
             }
         });
 
-
-        // Auto-focus logic for input fields
-        tensInput.addEventListener('input', (e) => {
-            // Limit input to 1 digit and ensure it's a number
-            e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
-            if (e.target.value.length === 1) {
-                unitsInput.focus();
-            }
+        // Logic tự động focus cho trường nhập liệu
+        answerInput.addEventListener('input', (e) => {
+            // Giới hạn input 2 chữ số và đảm bảo đó là số
+            e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 2);
         });
 
-        unitsInput.addEventListener('input', (e) => {
-            // Limit input to 1 digit and ensure it's a number
-            e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
-            // If a digit is entered, auto-focus on tens input (as per user's request)
-            if (e.target.value.length === 1) {
-                tensInput.focus();
-            }
-        });
-
-
-        // Event listener for next button
+        // Trình xử lý sự kiện cho nút tiếp theo
         nextBtn.addEventListener('click', () => {
             generateNewQuestion();
-            drawRoad(); // Redraw road after new question
+            drawRoad(); // Vẽ lại con đường sau câu hỏi mới
         });
 
-        // Event listener for popup restart button
+        // Trình xử lý sự kiện cho nút khởi động lại popup
         popupRestartBtn.addEventListener('click', () => {
             resetGame();
         });
 
-        // Function to check the answer
+        // Hàm kiểm tra câu trả lời
         function checkAnswer() {
-            const tensValue = parseInt(tensInput.value);
-            const unitsValue = parseInt(unitsInput.value);
+            const userAnswer = parseInt(answerInput.value);
 
-            if (isNaN(tensValue) && isNaN(unitsValue)) {
+            if (isNaN(userAnswer)) {
                 feedbackDiv.textContent = 'Ố ồ, bạn chưa nhập số nào kìa! 🧐';
                 feedbackDiv.className = 'feedback-incorrect';
                 return;
             }
-            if (isNaN(tensValue) && unitsInput.value.length === 1 && currentQuestion.answer < 10) {
-                // Special case for single-digit answers, if only units is entered.
-                // If the answer is less than 10, the tens digit is 0.
-                // We allow entering only the units digit.
-                const userAnswer = unitsValue;
-                if (userAnswer === currentQuestion.answer) {
-                    feedbackDiv.textContent = 'Siêu sao! Chính xác rồi! ✨';
-                    feedbackDiv.className = 'feedback-correct';
-                    correctAnswers++;
-                } else {
-                    feedbackDiv.textContent = `Tiếc quá, chưa đúng rồi. Câu trả lời đúng là ${currentQuestion.answer}. Cố gắng lên nhé! 😅`;
-                    feedbackDiv.className = 'feedback-incorrect';
-                    incorrectAnswers++;
-                }
-            } else if (isNaN(tensValue) || isNaN(unitsValue)) {
-                feedbackDiv.textContent = 'Ố ồ, bạn phải nhập cả hàng chục và hàng đơn vị kìa! 🧐';
-                feedbackDiv.className = 'feedback-incorrect';
-                return;
-            } else {
-                const userAnswer = tensValue * 10 + unitsValue;
-                if (userAnswer === currentQuestion.answer) {
-                    feedbackDiv.textContent = 'Siêu sao! Chính xác rồi! ✨';
-                    feedbackDiv.className = 'feedback-correct';
-                    correctAnswers++;
-                } else {
-                    feedbackDiv.textContent = `Tiếc quá, chưa đúng rồi. Câu trả lời đúng là ${currentQuestion.answer}. Cố gắng lên nhé! �`;
-                    feedbackDiv.className = 'feedback-incorrect';
-                    incorrectAnswers++;
-                }
-            }
 
+            if (userAnswer === currentQuestion.answer) {
+                feedbackDiv.textContent = 'Siêu sao! Chính xác rồi! ✨';
+                feedbackDiv.className = 'feedback-correct';
+                correctAnswers++;
+            } else {
+                feedbackDiv.textContent = `Tiếc quá, chưa đúng rồi. Câu trả lời đúng là ${currentQuestion.answer}. Cố gắng lên nhé! 😅`;
+                feedbackDiv.className = 'feedback-incorrect';
+                incorrectAnswers++;
+            }
 
             correctCountSpan.textContent = correctAnswers;
             incorrectCountSpan.textContent = incorrectAnswers;
 
             submitBtn.style.display = 'none';
-            tensInput.disabled = true; // Disable input after answer
-            unitsInput.disabled = true; // Disable input after answer
+            answerInput.disabled = true; // Vô hiệu hóa input sau khi trả lời
 
             if (correctAnswers >= maxRoadLength) {
-                // Show victory popup
+                // Hiển thị popup chiến thắng
                 popupMessage.textContent = `Bạn đã là nhà vô địch toán học!`;
                 popupCorrectCount.textContent = correctAnswers;
                 popupIncorrectCount.textContent = incorrectAnswers;
-                victoryPopup.style.display = 'flex'; // Show the popup
+                victoryPopup.style.display = 'flex'; // Hiển thị popup
 
-                // Hide main game controls
+                // Ẩn các điều khiển trò chơi chính
                 submitBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
-                questionArea.innerHTML = ''; // Clear question
-                tensInput.value = ''; // Clear input
-                unitsInput.value = ''; // Clear input
-                feedbackDiv.textContent = ''; // Clear feedback
+                questionArea.innerHTML = ''; // Xóa câu hỏi
+                answerInput.value = ''; // Xóa input
+                feedbackDiv.textContent = ''; // Xóa phản hồi
             } else {
                 nextBtn.style.display = 'inline-block';
             }
-            drawRoad(); // Update road visualization
+            drawRoad(); // Cập nhật hiển thị con đường
         }
 
-        // Function to reset the game
+        // Hàm đặt lại trò chơi
         function resetGame() {
             correctAnswers = 0;
             incorrectAnswers = 0;
             correctCountSpan.textContent = correctAnswers;
             incorrectCountSpan.textContent = incorrectAnswers;
-            victoryPopup.style.display = 'none'; // Hide the popup
+            victoryPopup.style.display = 'none'; // Ẩn popup
             generateNewQuestion();
             drawRoad();
         }
 
-        // Initialize the game
+        // Khởi tạo trò chơi
         window.onload = function() {
             generateNewQuestion();
-            drawRoad(); // Initial draw of the road
-            // Adjust canvas size for responsiveness
+            drawRoad(); // Vẽ con đường ban đầu
+            // Điều chỉnh kích thước canvas để đáp ứng
             const resizeCanvas = () => {
                 const containerWidth = roadCanvas.parentElement.clientWidth;
                 roadCanvas.width = containerWidth;
                 drawRoad();
             };
             window.addEventListener('resize', resizeCanvas);
-            resizeCanvas(); // Initial call to set size
+            resizeCanvas(); // Gọi ban đầu để đặt kích thước
         };
-
     </script>
 </body>
 </html>
-�

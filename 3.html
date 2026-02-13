@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Toán Lớp 2 - Phép Cộng Có Nhớ</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font as per instructions */
+        }
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            justify-items: center;
+        }
+        .problem-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1.5rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .number {
+            text-align: right;
+            width: 4rem;
+            padding-right: 0.5rem;
+        }
+        .line {
+            border-bottom: 2px solid #333;
+            width: 100%;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .input-group {
+            display: flex;
+            margin-top: 0.5rem;
+        }
+        .answer-input {
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 0.5rem; /* Rounded corners */
+            margin: 0 0.25rem;
+        }
+        .result-icon {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .exercise-button {
+            @apply flex flex-col items-center justify-center p-4 rounded-lg shadow-md transition duration-300 ease-in-out text-white font-bold text-lg;
+            min-width: 120px;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-blue-400 to-purple-500 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-4xl text-center">
+        <h1 class="text-4xl font-bold text-gray-800 mb-6">Học Toán Lớp 2</h1>
+        <h2 class="text-3xl font-semibold text-blue-600 mb-8">Phép Cộng Có Nhớ Trong Phạm Vi 100</h2>
+
+        <div id="homepage-view" class="hidden">
+            <h3 class="text-2xl font-bold text-gray-700 mb-6">Chọn bài tập</h3>
+            <div id="exercise-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-center">
+                </div>
+            <button id="clear-scores-btn" class="mt-8 bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out">
+                Xóa tất cả điểm
+            </button>
+        </div>
+
+        <div id="exercise-view" class="hidden">
+            <div id="exercise-container">
+                </div>
+
+            <div id="navigation-buttons" class="mt-8 flex justify-center space-x-4">
+                <button id="prev-exercise-btn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out hidden">
+                    Bài Trước
+                </button>
+                <button id="next-exercise-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out hidden">
+                    Bài Tiếp Theo
+                </button>
+            </div>
+
+            <button id="back-to-home-btn" class="mt-8 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out">
+                Quay lại Trang Chủ
+            </button>
+        </div>
+
+        <div id="final-message" class="mt-12 text-2xl font-bold text-green-700 hidden">
+            Chúc mừng bạn đã hoàn thành tất cả các bài tập!
+        </div>
+    </div>
+
+    <script>
+        const NUM_EXERCISES = 1000;
+        const QUESTIONS_PER_EXERCISE = 10;
+
+        let currentExerciseIndex = 0;
+        let exercisesData = []; // To store numbers for each problem
+        let scores = {}; // Stores scores for each exercise, e.g., { 'exercise_0': '8/10' }
+
+        // DOM Elements
+        const homepageView = document.getElementById('homepage-view');
+        const exerciseView = document.getElementById('exercise-view');
+        const exerciseList = document.getElementById('exercise-list');
+        const exerciseContainer = document.getElementById('exercise-container');
+        const prevExerciseBtn = document.getElementById('prev-exercise-btn');
+        const nextExerciseBtn = document.getElementById('next-exercise-btn');
+        const backToHomeBtn = document.getElementById('back-to-home-btn');
+        const finalMessage = document.getElementById('final-message');
+        const clearScoresBtn = document.getElementById('clear-scores-btn');
+
+        // Function to generate a random integer within a range
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Function to generate a single addition problem with carrying within 100
+        function generateAdditionProblem() {
+            let num1, num2, sum;
+            let carries = false;
+
+            do {
+                num1 = getRandomInt(10, 89); // Ensure num1 allows for carrying with num2, max 89 to avoid sum > 99 easily
+                num2 = getRandomInt(10, 89);
+                sum = num1 + num2;
+
+                // Check for carrying in units place
+                const units1 = num1 % 10;
+                const units2 = num2 % 10;
+                if ((units1 + units2) >= 10) {
+                    carries = true;
+                } else {
+                    carries = false;
+                }
+
+            } while (sum > 99 || !carries || num1 < 10 || num2 < 10); // Sum must be <= 99, must have carrying, both numbers are 2-digit
+
+            return { num1, num2, sum };
+        }
+
+        // Function to save scores to localStorage
+        function saveScores() {
+            localStorage.setItem('mathScores', JSON.stringify(scores));
+        }
+
+        // Function to load scores from localStorage
+        function loadScores() {
+            const storedScores = localStorage.getItem('mathScores');
+            if (storedScores) {
+                scores = JSON.parse(storedScores);
+            }
+        }
+
+        // Function to render the homepage with exercise list
+        function renderHomepage() {
+            homepageView.classList.remove('hidden');
+            exerciseView.classList.add('hidden');
+            finalMessage.classList.add('hidden');
+            exerciseList.innerHTML = ''; // Clear previous list
+
+            for (let i = 0; i < NUM_EXERCISES; i++) {
+                const exerciseId = `exercise_${i}`;
+                const currentScore = scores[exerciseId] || `0/${QUESTIONS_PER_EXERCISE}`;
+                let buttonClass = 'bg-blue-500 hover:bg-blue-600'; // Default color
+
+                if (currentScore === `${QUESTIONS_PER_EXERCISE}/${QUESTIONS_PER_EXERCISE}`) {
+                    buttonClass = 'bg-green-500 hover:bg-green-600'; // All correct
+                } else if (currentScore !== `0/${QUESTIONS_PER_EXERCISE}` && currentScore.includes('/')) {
+                    // Check if score is not default 0/10 but not 10/10
+                    const [correct, total] = currentScore.split('/').map(Number);
+                    if (correct > 0) {
+                        buttonClass = 'bg-yellow-500 hover:bg-yellow-600'; // Attempted but not perfect
+                    }
+                }
+
+                const exerciseButton = document.createElement('button');
+                exerciseButton.className = `exercise-button ${buttonClass}`;
+                exerciseButton.innerHTML = `Bài ${i + 1}<br><span class="text-sm mt-1">Điểm: ${currentScore}</span>`;
+                exerciseButton.dataset.exerciseIndex = i;
+                exerciseButton.addEventListener('click', () => showExercise(i));
+                exerciseList.appendChild(exerciseButton);
+            }
+        }
+
+        // Function to show a specific exercise
+        function showExercise(index) {
+            currentExerciseIndex = index;
+            homepageView.classList.add('hidden');
+            exerciseView.classList.remove('hidden');
+            renderExercise(currentExerciseIndex);
+        }
+
+        // Function to handle input in the units digit field and auto-focus tens digit
+        function handleUnitsInput(inputElement) {
+            // If a single digit has been entered in the units field
+            if (inputElement.value.length === 1) {
+                const problemIndex = inputElement.dataset.problemIndex;
+                // Find the corresponding tens input field for this problem
+                const tensInput = document.querySelector(`input.tens-input[data-problem-index="${problemIndex}"]`);
+                // If found, focus on it
+                if (tensInput) {
+                    tensInput.focus();
+                }
+            }
+        }
+
+        // Function to render an exercise
+        function renderExercise(exerciseIndex) {
+            exerciseContainer.innerHTML = ''; // Clear previous exercise
+
+            const exercise = exercisesData[exerciseIndex];
+            if (!exercise) {
+                console.error("Exercise data not found for index:", exerciseIndex);
+                return;
+            }
+
+            const exerciseDiv = document.createElement('div');
+            exerciseDiv.className = 'exercise mb-8 p-6 bg-blue-50 rounded-lg shadow-md';
+            exerciseDiv.innerHTML = `
+                <h3 class="text-2xl font-bold text-gray-700 mb-6">Bài tập ${exerciseIndex + 1}</h3>
+                <div class="problem-grid" id="problems-grid-${exerciseIndex}"></div>
+                <div class="mt-8 flex justify-center">
+                    <button class="check-answers-btn bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out mr-4">
+                        Kiểm tra đáp án
+                    </button>
+                    <span class="score-display text-xl font-semibold text-gray-700">Điểm: ${scores[`exercise_${exerciseIndex}`] || `0/${QUESTIONS_PER_EXERCISE}`}</span>
+                </div>
+            `;
+            exerciseContainer.appendChild(exerciseDiv);
+
+            const problemsGrid = document.getElementById(`problems-grid-${exerciseIndex}`);
+
+            exercise.problems.forEach((problem, problemIndex) => {
+                const problemItem = document.createElement('div');
+                problemItem.className = 'problem-item';
+                problemItem.innerHTML = `
+                    <div class="number">${problem.num1}</div>
+                    <div class="number flex justify-between items-center w-full">
+                        <span class="mr-2">+</span>${problem.num2}
+                    </div>
+                    <div class="line"></div>
+                    <div class="input-group">
+                        <input type="text" maxlength="1" class="answer-input tens-input" data-problem-index="${problemIndex}" data-digit="tens" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1)">
+                        <input type="text" maxlength="1" class="answer-input units-input" data-problem-index="${problemIndex}" data-digit="units" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1); handleUnitsInput(this);">
+                    </div>
+                    <div class="result-icon" id="result-icon-${exerciseIndex}-${problemIndex}"></div>
+                `;
+                problemsGrid.appendChild(problemItem);
+            });
+
+            // Add event listener for checking answers
+            exerciseDiv.querySelector('.check-answers-btn').addEventListener('click', () => checkAnswers(exerciseIndex));
+
+            updateNavigationButtons();
+        }
+
+        // Function to check answers for the current exercise
+        function checkAnswers(exerciseIndex) {
+            const exercise = exercisesData[exerciseIndex];
+            if (!exercise) return;
+
+            let correctCount = 0;
+            exercise.problems.forEach((problem, problemIndex) => {
+                const tensInput = document.querySelector(`#problems-grid-${exerciseIndex} input.tens-input[data-problem-index="${problemIndex}"]`);
+                const unitsInput = document.querySelector(`#problems-grid-${exerciseIndex} input.units-input[data-problem-index="${problemIndex}"]`);
+                const resultIcon = document.getElementById(`result-icon-${exerciseIndex}-${problemIndex}`);
+
+                const userAnswerTens = tensInput.value;
+                const userAnswerUnits = unitsInput.value;
+                const userAnswer = parseInt(`${userAnswerTens || '0'}${userAnswerUnits || '0'}`); // Combine and parse
+
+                // Clear previous state
+                resultIcon.innerHTML = '';
+                resultIcon.classList.remove('correct', 'incorrect');
+
+                if (userAnswer === problem.sum && String(userAnswer).length === String(problem.sum).length) {
+                    resultIcon.innerHTML = '&#10003;'; // Checkmark
+                    resultIcon.classList.add('correct');
+                    correctCount++;
+                } else {
+                    resultIcon.innerHTML = '&#10007;'; // X mark
+                    resultIcon.classList.add('incorrect');
+                }
+            });
+
+            // Update score display for current exercise
+            const currentScoreDisplay = `${correctCount}/${QUESTIONS_PER_EXERCISE}`;
+            exerciseContainer.querySelector('.score-display').textContent = `Điểm: ${currentScoreDisplay}`;
+
+            // Save the score
+            scores[`exercise_${exerciseIndex}`] = currentScoreDisplay;
+            saveScores();
+
+            // This logic might need refinement if not all previous exercises are 10/10
+            // For now, it checks if ALL exercises have a score saved and the current one is perfect.
+            // A better check would be to see if all exercises have a 10/10 score.
+            const allPerfect = Object.values(scores).every(score => score === `${QUESTIONS_PER_EXERCISE}/${QUESTIONS_PER_EXERCISE}`);
+            if (allPerfect && Object.keys(scores).length === NUM_EXERCISES) {
+                 finalMessage.classList.remove('hidden');
+            }
+        }
+
+        // Function to update navigation button visibility
+        function updateNavigationButtons() {
+            prevExerciseBtn.classList.add('hidden');
+            nextExerciseBtn.classList.add('hidden');
+
+            if (currentExerciseIndex > 0) {
+                prevExerciseBtn.classList.remove('hidden');
+            }
+            if (currentExerciseIndex < NUM_EXERCISES - 1) {
+                nextExerciseBtn.classList.remove('hidden');
+            }
+        }
+
+        // Event listener for "Clear All Scores" button with confirmation
+        clearScoresBtn.addEventListener('click', () => {
+            const confirmationCode = prompt("Nhập '000' để xác nhận xóa tất cả điểm:");
+            if (confirmationCode === '000') {
+                localStorage.removeItem('mathScores');
+                scores = {};
+                renderHomepage();
+                alert("Đã xóa tất cả điểm thành công!");
+            } else if (confirmationCode !== null) { // User entered something but it's wrong
+                alert("Mã xác nhận không đúng. Không xóa điểm.");
+            } else { // User clicked cancel
+                alert("Đã hủy thao tác xóa điểm.");
+            }
+        });
+
+        // Event listeners for navigation
+        prevExerciseBtn.addEventListener('click', () => {
+            if (currentExerciseIndex > 0) {
+                showExercise(currentExerciseIndex - 1);
+            }
+        });
+
+        nextExerciseBtn.addEventListener('click', () => {
+            if (currentExerciseIndex < NUM_EXERCISES - 1) {
+                showExercise(currentExerciseIndex + 1);
+            }
+        });
+
+        backToHomeBtn.addEventListener('click', renderHomepage);
+
+        // Initialize exercises and load scores
+        function initializeApplication() {
+            loadScores(); // Load scores first
+
+            // Generate all problems only once if not already generated (for persistence across sessions)
+            if (exercisesData.length === 0) {
+                for (let i = 0; i < NUM_EXERCISES; i++) {
+                    let problems = [];
+                    for (let j = 0; j < QUESTIONS_PER_EXERCISE; j++) {
+                        problems.push(generateAdditionProblem());
+                    }
+                    exercisesData.push({ id: i, problems: problems });
+                }
+            }
+
+            renderHomepage(); // Show the homepage initially
+        }
+
+        // Start the application when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApplication();
+        });
+
+    </script>
+</body>
+</html>

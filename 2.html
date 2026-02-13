@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Tập Toán hơn Phép Cộng Có Nhớ Nhỏ  20</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React and ReactDOM CDNs -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Custom styles for finer control */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align items to the start for better scrolling with lots of content */
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem; /* 40px */
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 30px;
+        }
+        .problem-set {
+            margin-top: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f7fafc;
+        }
+        .problem-set h2 {
+            font-size: 2.25rem; /* 36px */
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .problem-card {
+            background-color: #edf2f7;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .problem-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .problem-text span {
+            margin: 0 3px;
+        }
+        .problem-text select {
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e0;
+            background-color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #2d3748;
+            appearance: none;
+            /*background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27%234A5568%27%3E%3Cpath%20d%3D%27M7%2010l5%205%205-5z%27%2F%3E%3C%2Fsvg%3E"); */
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 20px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .problem-text select:focus {
+            border-color: #3182ce;
+        }
+        .check-all-button {
+            background-color: #4299e1;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border: none;
+        }
+        .check-all-button:hover {
+            background-color: #3182ce;
+            transform: translateY(-2px);
+        }
+        .feedback {
+            margin-top: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            min-height: 1.5em;
+        }
+        .feedback.correct {
+            color: #38a169;
+        }
+        .feedback.incorrect {
+            color: #e53e3e;
+        }
+        .overall-feedback {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .overall-feedback.incorrect {
+            color: #e53e3e;
+        }
+        .overall-feedback.correct {
+            color: #38a169;
+        }
+
+        /* Styles for progress display on lesson buttons */
+        .lesson-button-progress {
+            font-size: 0.9rem;
+            font-weight: normal;
+            margin-top: 4px;
+            display: block;
+        }
+        .lesson-button {
+            /* Default blue from Tailwind bg-blue-500 */
+        }
+        .lesson-button.completed {
+            background-color: #48bb78; /* Green for completed */
+        }
+        .lesson-button.completed:hover {
+            background-color: #38a169;
+        }
+        .lesson-button.in-progress {
+            background-color: #ecc94b; /* Yellow for in progress */
+            color: #3a3a3a; /* Darker text for contrast on yellow */
+        }
+        .lesson-button.in-progress:hover {
+            background-color: #d6bc3f;
+        }
+
+        .clear-results-section {
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .clear-results-section button {
+            background-color: #e53e3e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        .clear-results-section button:hover {
+            background-color: #c53030;
+            transform: translateY(-2px);
+        }
+        .clear-results-feedback {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #38a169; /* Green for success */
+        }
+        .clear-results-feedback.error {
+            color: #e53e3e; /* Red for error */
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transform: translateY(-20px); /* Slightly lift for animation */
+            animation: slideIn 0.3s forwards ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-content input[type="password"] {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e0;
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal-content input[type="password"]:focus {
+            border-color: #3182ce;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+        .modal-buttons button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: none;
+            flex: 1; /* Make buttons take equal width */
+        }
+        .modal-buttons .confirm-button {
+            background-color: #e53e3e;
+            color: white;
+        }
+        .modal-buttons .confirm-button:hover {
+            background-color: #c53030;
+        }
+        .modal-buttons .cancel-button {
+            background-color: #e2e8f0;
+            color: #2d3748;
+        }
+        .modal-buttons .cancel-button:hover {
+            background-color: #cbd5e0;
+        }
+        .modal-feedback {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: -10px; /* Reduce space after input */
+            min-height: 1.5em; /* Prevent layout shift */
+        }
+        .modal-feedback.error {
+            color: #e53e3e;
+        }
+        .modal-feedback.success {
+            color: #38a169;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="root" style="width: 100%;" ></div>
+
+    <script type="text/babel">
+        // Hàm xáo trộn mảng
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        };
+
+        // Hàm tạo các lựa chọn cho dropdown (đáp án đúng và các đáp án sai ngẫu nhiên)
+        const generateChoices = (correctAnswer) => {
+            let choices = new Set();
+            choices.add(correctAnswer);
+
+            // Thêm các lựa chọn gần với đáp án đúng
+            const offsets = [-3, -2, -1, 1, 2, 3];
+            shuffleArray(offsets);
+
+            for (let i = 0; choices.size < 3 && i < offsets.length; i++) {
+                let choice = correctAnswer + offsets[i];
+                if (choice !== correctAnswer && choice >= 0 && choice < 20) { // Giới hạn tổng dưới 20
+                    choices.add(choice);
+                }
+            }
+
+            // Nếu vẫn chưa đủ 3 lựa chọn, thêm các số ngẫu nhiên khác
+            while (choices.size < 3) {
+                let randomChoice = Math.floor(Math.random() * 19); // Số từ 0 đến 18 (tổng nhỏ hơn 20)
+                if (randomChoice !== correctAnswer && !choices.has(randomChoice)) {
+                    choices.add(randomChoice);
+                }
+            }
+            
+            let result = Array.from(choices);
+            shuffleArray(result); // Xáo trộn để đáp án đúng không phải lúc nào cũng ở cùng một vị trí
+            return result;
+        };
+
+        // Component con cho một bài toán cộng đơn lẻ
+        const MathProblem = React.forwardRef(({ problemData, problemIndex }, ref) => {
+            const { num1, num2, correctSo3, correctSo4, correctSum } = problemData;
+            const [selectedSo3, setSelectedSo3] = React.useState("");
+            const [selectedSo4, setSelectedSo4] = React.useState("");
+            const [selectedSum, setSelectedSum] = React.useState("");
+            const [feedback, setFeedback] = React.useState("");
+            const [isCorrect, setIsCorrect] = React.useState(false);
+
+            // Expose a method to the parent to get the current answers and check correctness
+            React.useImperativeHandle(ref, () => ({
+                checkAnswer: () => {
+                    if (selectedSo3 === "" || selectedSo4 === "" || selectedSum === "") {
+                        setFeedback("Vui lòng chọn đủ các giá trị.");
+                        setIsCorrect(false);
+                        return { isComplete: false, isCorrect: false };
+                    }
+
+                    const parsedSo3 = parseInt(selectedSo3);
+                    const parsedSo4 = parseInt(selectedSo4);
+                    const parsedSum = parseInt(selectedSum);
+
+                    const so3Match = parsedSo3 === correctSo3;
+                    const so4Match = parsedSo4 === correctSo4;
+                    const sumMatch = parsedSum === correctSum;
+
+                    if (so3Match && so4Match && sumMatch) {
+                        setFeedback("Chính xác! 🎉");
+                        setIsCorrect(true);
+                        return { isComplete: true, isCorrect: true };
+                    } else {
+                        setFeedback("Chưa đúng. Hãy thử lại.");
+                        setIsCorrect(false);
+                        return { isComplete: true, isCorrect: false };
+                    }
+                },
+                resetFeedback: () => {
+                    setFeedback("");
+                    setIsCorrect(false);
+                },
+                resetSelections: () => {
+                    setSelectedSo3("");
+                    setSelectedSo4("");
+                    setSelectedSum("");
+                    setFeedback("");
+                    setIsCorrect(false);
+                }
+            }));
+
+            // Generate choices for dropdowns
+            const so3Choices = generateChoices(correctSo3);
+            const so4Choices = generateChoices(correctSo4);
+            const sumChoices = generateChoices(correctSum);
+
+            return (
+                <div className="problem-card">
+                    <p className="problem-text">
+                        <span>{num1}</span> + <span>{num2}</span> =
+                        <span>{num1}</span> + 
+                        <select 
+                            className="so3-select" 
+                            value={selectedSo3} 
+                            onChange={(e) => setSelectedSo3(e.target.value)}
+                        >
+                            <option value="" disabled hidden></option> {/* Blank space */}
+                            {so3Choices.map((choice) => (
+                                <option key={choice} value={choice}>{choice}</option>
+                            ))}
+                        </select> + 
+                        <select 
+                            className="so4-select" 
+                            value={selectedSo4} 
+                            onChange={(e) => setSelectedSo4(e.target.value)}
+                        >
+                            <option value="" disabled hidden></option> {/* Blank space */}
+                            {so4Choices.map((choice) => (
+                                <option key={choice} value={choice}>{choice}</option>
+                            ))}
+                        </select> = 
+                        <select 
+                            className="tong-select" 
+                            value={selectedSum} 
+                            onChange={(e) => setSelectedSum(e.target.value)}
+                        >
+                            <option value="" disabled hidden></option> {/* Blank space */}
+                            {sumChoices.map((choice) => (
+                                <option key={choice} value={choice}>{choice}</option>
+                            ))}
+                        </select>
+                    </p>
+                    <p className={`feedback ${isCorrect ? 'correct' : (feedback ? 'incorrect' : '')}`}>
+                        {feedback}
+                    </p>
+                </div>
+            );
+        });
+
+        // Component cho một bài học (10 câu hỏi)
+        const MathLesson = ({ lessonId, onBackToHome, updateLessonProgress }) => {
+            const [problems, setProblems] = React.useState([]);
+            const problemRefs = React.useRef([]);
+            const [overallLessonFeedback, setOverallLessonFeedback] = React.useState("");
+            const [allLessonProblemsCorrect, setAllLessonProblemsCorrect] = React.useState(false);
+
+            // Generate 10 new problems when the lessonId changes
+            React.useEffect(() => {
+                const newProblems = Array.from({ length: 10 }, () => {
+                    let num1, num2, sum, so3, so4;
+                    do {
+                        num1 = Math.floor(Math.random() * 9) + 1; // 1-9
+                        num2 = Math.floor(Math.random() * 9) + 1; // 1-9
+                        sum = num1 + num2;
+                    } while (sum < 10 || sum >= 20); // Sum must be >= 10 for carrying and < 20
+
+                    so3 = 10 - num1;
+                    so4 = num2 - so3;
+                    return { num1, num2, correctSo3: so3, correctSo4: so4, correctSum: sum };
+                });
+                setProblems(newProblems);
+                setOverallLessonFeedback("");
+                setAllLessonProblemsCorrect(false);
+                // Reset feedback for all child problems
+                problemRefs.current = problemRefs.current.slice(0, newProblems.length); // Ensure refs array size matches
+                problemRefs.current.forEach(ref => ref && ref.resetFeedback && ref.resetFeedback());
+            }, [lessonId]);
+
+            // Handle check all problems in the current lesson
+            const handleCheckAll = () => {
+                let allCorrectCount = 0;
+                let incompleteCount = 0;
+
+                problemRefs.current.forEach((ref) => {
+                    if (ref) {
+                        const result = ref.checkAnswer();
+                        if (!result.isComplete) {
+                            incompleteCount++;
+                        }
+                        if (result.isCorrect) {
+                            allCorrectCount++;
+                        }
+                    }
+                });
+
+                // Update progress in local storage via parent function
+                updateLessonProgress(lessonId, allCorrectCount, problems.length);
+
+                if (incompleteCount > 0) {
+                    setOverallLessonFeedback(`Vui lòng hoàn thành ${incompleteCount} câu chưa trả lời.`);
+                    setAllLessonProblemsCorrect(false);
+                } else if (allCorrectCount === problems.length) {
+                    setOverallLessonFeedback("Chúc mừng! Bạn đã hoàn thành tất cả các câu hỏi trong bài này! 🎉");
+                    setAllLessonProblemsCorrect(true);
+                } else {
+                    setOverallLessonFeedback("Có lỗi trong các bài làm. Vui lòng kiểm tra lại.");
+                    setAllLessonProblemsCorrect(false);
+                }
+            };
+
+            return (
+                <div className="problem-set">
+                    <div className="flex justify-between items-center mb-6">
+                        <button 
+                            onClick={onBackToHome} 
+                            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-full shadow transition-all duration-200"
+                        >
+                            &lt; Quay lại trang chủ
+                        </button>
+                        <h2 className="text-3xl font-bold text-blue-700">Bài Tập {lessonId}</h2>
+                        <div></div> {/* Placeholder for alignment */}
+                    </div>
+                    
+                    <div className="problem-grid">
+                        {problems.map((problem, index) => (
+                            <MathProblem 
+                                key={index} // Key for React list rendering
+                                problemData={problem} 
+                                problemIndex={index}
+                                ref={el => problemRefs.current[index] = el} // Store ref for each problem
+                            />
+                        ))}
+                    </div>
+
+                    <button 
+                        onClick={handleCheckAll} 
+                        className="check-all-button"
+                    >
+                        Kiểm tra bài này
+                    </button>
+                    <p className={`overall-feedback ${allLessonProblemsCorrect ? 'correct' : (overallLessonFeedback ? 'incorrect' : '')}`}>
+                        {overallLessonFeedback}
+                    </p>
+                </div>
+            );
+        };
+
+        // Password Modal Component
+        const PasswordModal = ({ isOpen, onClose, onConfirm, feedbackMessage }) => {
+            const [password, setPassword] = React.useState('');
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3 className="text-xl font-semibold text-gray-700">Xóa Kết Quả Đã Lưu</h3>
+                        <p className="text-gray-600">Vui lòng nhập mật khẩu để xác nhận.</p>
+                        <input
+                            type="password"
+                            placeholder="Nhập mật khẩu"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    onConfirm(password);
+                                }
+                            }}
+                            autoFocus
+                        />
+                        {feedbackMessage && (
+                            <p className={`modal-feedback ${feedbackMessage.includes('không đúng') ? 'error' : 'success'}`}>
+                                {feedbackMessage}
+                            </p>
+                        )}
+                        <div className="modal-buttons">
+                            <button onClick={() => onConfirm(password)} className="confirm-button">
+                                Xác nhận xóa
+                            </button>
+                            <button onClick={onClose} className="cancel-button">
+                                Hủy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Component Trang Chủ
+        const HomePage = ({ onSelectLesson, lessonProgress, clearAllProgress }) => {
+            const [showClearModal, setShowClearModal] = React.useState(false);
+            const [modalFeedback, setModalFeedback] = React.useState('');
+
+            const handleOpenClearModal = () => {
+                setShowClearModal(true);
+                setModalFeedback(''); // Clear previous feedback
+            };
+
+            const handleCloseClearModal = () => {
+                setShowClearModal(false);
+                setModalFeedback('');
+            };
+
+            const handleConfirmClear = (password) => {
+                const success = clearAllProgress(password);
+                if (success) {
+                    setModalFeedback('Đã xóa tất cả kết quả thành công!');
+                    setTimeout(() => handleCloseClearModal(), 1500); // Close modal after success message
+                } else {
+                    setModalFeedback('Mật khẩu không đúng. Vui lòng thử lại.');
+                }
+            };
+
+            return (
+                <div className="text-center">
+                    <h2 className="text-3xl font-bold text-gray-800 mb-8">Chọn Bài Tập</h2>
+                    {/* Render only 3 lesson buttons */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                        {Array.from({ length: 1000 }, (_, i) => i + 1).map((lessonNum) => {
+                            const progress = lessonProgress[lessonNum] || { correct: 0, total: 10 };
+                            const isCompleted = progress.correct === progress.total && progress.total > 0;
+                            const isInProgress = progress.correct > 0 && progress.correct < progress.total;
+                            
+                            let buttonClass = "bg-blue-500 hover:bg-blue-600"; // Default blue
+                            if (isCompleted) {
+                                buttonClass = "lesson-button completed";
+                            } else if (isInProgress) {
+                                buttonClass = "lesson-button in-progress";
+                            }
+
+                            return (
+                                <button
+                                    key={lessonNum}
+                                    onClick={() => onSelectLesson(lessonNum)}
+                                    className={`${buttonClass} text-white font-bold py-5 px-5 rounded-lg shadow-lg 
+                                               transform transition-all duration-200 hover:scale-105 active:scale-95 
+                                               focus:outline-none focus:ring-4 focus:ring-blue-300`}
+                                >
+                                    Bài {lessonNum}
+                                    {/* Only show progress if started or completed */}
+                                    {(isCompleted || isInProgress) && (
+                                        <span className="lesson-button-progress">
+                                            ({progress.correct}/{progress.total})
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="clear-results-section">
+                        <button onClick={handleOpenClearModal}>
+                            Xóa tất cả kết quả
+                        </button>
+                    </div>
+
+                    <PasswordModal
+                        isOpen={showClearModal}
+                        onClose={handleCloseClearModal}
+                        onConfirm={handleConfirmClear}
+                        feedbackMessage={modalFeedback}
+                    />
+                </div>
+            );
+        };
+
+        // Component chính của ứng dụng
+        function App() {
+            const [currentView, setCurrentView] = React.useState('home'); // 'home' hoặc lesson number
+            // Load progress from localStorage on initial render
+            const [lessonProgress, setLessonProgress] = React.useState(() => {
+                try {
+                    const savedProgress = localStorage.getItem('mathProgress');
+                    return savedProgress ? JSON.parse(savedProgress) : {};
+                } catch (error) {
+                    console.error("Error loading progress from localStorage:", error);
+                    return {};
+                }
+            });
+
+            // Update localStorage whenever lessonProgress changes
+            React.useEffect(() => {
+                try {
+                    localStorage.setItem('mathProgress', JSON.stringify(lessonProgress));
+                } catch (error) {
+                    console.error("Error saving progress to localStorage:", error);
+                }
+            }, [lessonProgress]);
+
+            const handleSelectLesson = (lessonNum) => {
+                setCurrentView(lessonNum);
+            };
+
+            const handleBackToHome = () => {
+                setCurrentView('home');
+            };
+
+            const updateLessonProgress = (lessonId, correctCount, totalCount) => {
+                setLessonProgress(prevProgress => {
+                    const newProgress = {
+                        ...prevProgress,
+                        [lessonId]: { correct: correctCount, total: totalCount }
+                    };
+                    return newProgress;
+                });
+            };
+
+            const clearAllProgress = (inputPassword) => {
+                const CORRECT_PASSWORD = '000'; // Define the correct password here
+                if (inputPassword === CORRECT_PASSWORD) {
+                    try {
+                        localStorage.removeItem('mathProgress');
+                        setLessonProgress({}); // Reset state
+                        return true;
+                    } catch (error) {
+                        console.error("Error clearing progress from localStorage:", error);
+                        return false;
+                    }
+                }
+                return false; // Incorrect password
+            };
+
+            return (
+                <div className="container">
+                    <h1 className="mb-8">Bài Tập Toán Lớp 2 Phép cộng Có Nhớ Nhỏ Hơn 20</h1>
+                    {currentView === 'home' ? (
+                        <HomePage 
+                            onSelectLesson={handleSelectLesson} 
+                            lessonProgress={lessonProgress}
+                            clearAllProgress={clearAllProgress}
+                        />
+                    ) : (
+                        <MathLesson 
+                            lessonId={currentView} 
+                            onBackToHome={handleBackToHome}
+                            updateLessonProgress={updateLessonProgress}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        // Render ứng dụng React vào div#root
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+    </script>
+</body>
+</html>
