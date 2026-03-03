@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bé Học Xem Đồng Hồ - Thử Thách 24 Giờ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f0f9ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: none;
+            user-select: none;
+        }
+        .clock-face {
+            fill: white;
+            stroke: #1e293b;
+            stroke-width: 8;
+        }
+        .hand {
+            stroke-linecap: round;
+            transition: stroke 0.2s;
+            cursor: grab;
+        }
+        .hand:active {
+            cursor: grabbing;
+        }
+        .hour-hand {
+            stroke: #ef4444;
+            stroke-width: 10;
+        }
+        .minute-hand {
+            stroke: #3b82f6;
+            stroke-width: 7;
+        }
+        .hand-touch-area {
+            stroke: transparent;
+            stroke-width: 45;
+            fill: none;
+            cursor: grab;
+        }
+        .center-dot {
+            fill: #1e293b;
+        }
+        .number-text {
+            font-size: 32px;
+            font-weight: bold;
+            fill: #1e293b;
+            pointer-events: none;
+        }
+        .progress-fill {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes success-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .success-animate {
+            animation: success-pop 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-md w-full text-center border-4 border-blue-100">
+        <!-- Tiến trình -->
+        <div class="mb-6">
+            <div class="flex justify-between text-sm font-bold text-blue-600 mb-1">
+                <span>Chặng đường hoàn thành:</span>
+                <span id="score-text">0/20</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden border border-gray-300">
+                <div id="progress-bar" class="progress-fill bg-green-500 h-full w-0"></div>
+            </div>
+        </div>
+
+        <div id="question-area" class="bg-blue-50 p-4 rounded-2xl border-2 border-blue-200 mb-6">
+            <p class="text-gray-600 font-bold uppercase tracking-wider text-xs mb-1">Câu hỏi dành cho bé:</p>
+            <div id="target-time-text" class="text-3xl font-black text-blue-700">--:--</div>
+            <!-- Dòng gợi ý: Mặc định ẩn, chỉ hiện khi sai -->
+            <p id="hint-text" class="text-sm text-orange-600 mt-2 font-medium italic min-h-[1.25rem] opacity-0 transition-opacity duration-300"></p>
+        </div>
+
+        <!-- Đồng hồ SVG -->
+        <div class="relative w-72 h-72 mx-auto mb-6 bg-white rounded-full flex items-center justify-center shadow-inner" id="clock-container">
+            <svg viewBox="0 0 400 400" width="100%" height="100%" id="clock-svg" class="overflow-visible">
+                <circle cx="200" cy="200" r="190" class="clock-face" />
+                
+                <!-- Chỉ hiện số từ 1-12 -->
+                <g id="numbers"></g>
+
+                <!-- Kim giờ -->
+                <g id="hourGroup" class="cursor-pointer">
+                    <line x1="200" y1="200" x2="200" y2="110" class="hand-touch-area" />
+                    <line id="hourHand" x1="200" y1="200" x2="200" y2="110" class="hand hour-hand" />
+                </g>
+                
+                <!-- Kim phút -->
+                <g id="minuteGroup" class="cursor-pointer">
+                    <line x1="200" y1="200" x2="200" y2="60" class="hand-touch-area" />
+                    <line id="minuteHand" x1="200" y1="200" x2="200" y2="60" class="hand minute-hand" />
+                </g>
+                
+                <circle cx="200" cy="200" r="10" class="center-dot" />
+            </svg>
+        </div>
+
+        <div class="space-y-4">
+            <button id="btn-check" class="w-full bg-green-500 hover:bg-green-600 text-white font-extrabold py-4 px-8 rounded-2xl transition-all transform active:scale-95 shadow-[0_4px_0_rgb(22,101,52)] text-xl">
+                KIỂM TRA KẾT QUẢ
+            </button>
+            
+            <div id="feedback" class="min-h-[3rem] flex items-center justify-center font-bold text-xl transition-all"></div>
+        </div>
+    </div>
+
+    <!-- Màn hình hoàn thành -->
+    <div id="victory-modal" class="hidden fixed inset-0 bg-blue-600 bg-opacity-90 z-50 flex items-center justify-center p-6 text-center text-white">
+        <div>
+            <div class="text-8xl mb-4">🏆</div>
+            <h2 class="text-4xl font-black mb-2">XUẤT SẮC!</h2>
+            <p class="text-xl mb-8">Bé đã hoàn thành chặng đường 20 câu hỏi!</p>
+            <button onclick="location.reload()" class="bg-white text-blue-600 font-bold py-4 px-10 rounded-full text-xl shadow-xl">CHƠI LẠI TỪ ĐẦU</button>
+        </div>
+    </div>
+
+    <script>
+        const hourGroup = document.getElementById('hourGroup');
+        const minuteGroup = document.getElementById('minuteGroup');
+        const clockSvg = document.getElementById('clock-svg');
+        const feedback = document.getElementById('feedback');
+        const btnCheck = document.getElementById('btn-check');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreText = document.getElementById('score-text');
+        const targetTimeDisplay = document.getElementById('target-time-text');
+        const hintDisplay = document.getElementById('hint-text');
+        const victoryModal = document.getElementById('victory-modal');
+
+        let currentHour = 12;
+        let currentMinute = 0;
+        let targetHourRaw = 0;
+        let targetMinute = 0;
+        let correctCount = 0;
+        const totalToWin = 20;
+
+        let isDragging = false;
+        let activeHand = null;
+
+        function initClock() {
+            const numbersGroup = document.getElementById('numbers');
+            for (let i = 1; i <= 12; i++) {
+                const angle = (i * 30) * (Math.PI / 180);
+                const x = 200 + 145 * Math.sin(angle);
+                const y = 200 - 145 * Math.cos(angle);
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", x);
+                text.setAttribute("y", y + 12);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("class", "number-text");
+                text.textContent = i;
+                numbersGroup.appendChild(text);
+            }
+            updateClockUI();
+            generateChallenge();
+        }
+
+        function updateClockUI() {
+            const minuteAngle = currentMinute * 6;
+            const hourAngle = (currentHour % 12) * 30 + (currentMinute / 60) * 30;
+
+            minuteGroup.setAttribute('transform', `rotate(${minuteAngle}, 200, 200)`);
+            hourGroup.setAttribute('transform', `rotate(${hourAngle}, 200, 200)`);
+        }
+
+        function getAngle(e) {
+            const rect = clockSvg.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const x = clientX - rect.left - rect.width / 2;
+            const y = clientY - rect.top - rect.height / 2;
+            let angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
+            if (angle < 0) angle += 360;
+            return angle;
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const angle = getAngle(e);
+
+            if (activeHand === 'minute') {
+                let snappedMinute = Math.round(angle / 6 / 5) * 5;
+                if (snappedMinute >= 60) snappedMinute = 0;
+                currentMinute = snappedMinute;
+            } else if (activeHand === 'hour') {
+                let snappedHour = Math.round(angle / 30);
+                if (snappedHour === 0) snappedHour = 12;
+                if (snappedHour > 12) snappedHour = 12;
+                currentHour = snappedHour;
+            }
+            updateClockUI();
+            feedback.textContent = "";
+            // Ẩn gợi ý khi bé bắt đầu xoay lại
+            hintDisplay.classList.add('opacity-0');
+        }
+
+        function startDrag(handType) {
+            isDragging = true;
+            activeHand = handType;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            activeHand = null;
+            document.body.style.overflow = 'auto';
+        }
+
+        minuteGroup.addEventListener('mousedown', (e) => { e.preventDefault(); startDrag('minute'); });
+        hourGroup.addEventListener('mousedown', (e) => { e.preventDefault(); startDrag('hour'); });
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', stopDrag);
+        minuteGroup.addEventListener('touchstart', (e) => { e.preventDefault(); startDrag('minute'); }, {passive: false});
+        hourGroup.addEventListener('touchstart', (e) => { e.preventDefault(); startDrag('hour'); }, {passive: false});
+        window.addEventListener('touchmove', handleMove, {passive: false});
+        window.addEventListener('touchend', stopDrag);
+
+        function generateChallenge() {
+            const is24h = Math.random() > 0.5;
+            if (is24h) {
+                targetHourRaw = Math.floor(Math.random() * 11) + 13; 
+            } else {
+                targetHourRaw = Math.floor(Math.random() * 12) + 1;
+            }
+            
+            targetMinute = (Math.floor(Math.random() * 12)) * 5;
+            targetTimeDisplay.textContent = `${targetHourRaw} giờ ${targetMinute} phút`;
+            
+            // Luôn ẩn gợi ý khi sang câu mới
+            hintDisplay.textContent = "";
+            hintDisplay.classList.add('opacity-0');
+
+            feedback.textContent = "";
+            btnCheck.disabled = false;
+            btnCheck.className = "w-full bg-green-500 hover:bg-green-600 text-white font-extrabold py-4 px-8 rounded-2xl transition-all transform active:scale-95 shadow-[0_4px_0_rgb(22,101,52)] text-xl";
+        }
+
+        btnCheck.addEventListener('click', () => {
+            let compareHour = targetHourRaw % 12;
+            if (compareHour === 0) compareHour = 12;
+
+            if (currentHour === compareHour && currentMinute === targetMinute) {
+                correctCount++;
+                updateProgress();
+                feedback.innerHTML = "✅ CHÍNH XÁC!";
+                feedback.className = "min-h-[3rem] flex items-center justify-center font-bold text-green-600 success-animate";
+                btnCheck.disabled = true;
+                btnCheck.className = "w-full bg-gray-300 text-gray-500 font-extrabold py-4 px-8 rounded-2xl cursor-not-allowed text-xl";
+                
+                // Ẩn gợi ý nếu trước đó có hiện
+                hintDisplay.classList.add('opacity-0');
+
+                if (correctCount >= totalToWin) {
+                    setTimeout(() => victoryModal.classList.remove('hidden'), 1000);
+                } else {
+                    setTimeout(generateChallenge, 1500);
+                }
+            } else {
+                feedback.innerHTML = "❌ CHƯA ĐÚNG RỒI!";
+                feedback.className = "min-h-[3rem] flex items-center justify-center font-bold text-red-500";
+                
+                // Chỉ hiện gợi ý khi trả lời sai (đối với giờ > 12)
+                if (targetHourRaw > 12) {
+                    hintDisplay.textContent = `💡 Mẹo: Lấy ${targetHourRaw} trừ 12 để tìm số trên đồng hồ nhé!`;
+                    hintDisplay.classList.remove('opacity-0');
+                } else {
+                    hintDisplay.textContent = "💡 Bé kiểm tra lại vị trí các kim nhé!";
+                    hintDisplay.classList.remove('opacity-0');
+                }
+            }
+        });
+
+        function updateProgress() {
+            const percentage = (correctCount / totalToWin) * 100;
+            progressBar.style.width = percentage + "%";
+            scoreText.textContent = `${correctCount}/${totalToWin}`;
+        }
+
+        initClock();
+    </script>
+</body>
+</html>
