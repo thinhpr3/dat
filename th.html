@@ -30,37 +30,39 @@
 
         .game-container {
             background-color: var(--card-bg);
-            border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(74, 144, 226, 0.15);
-            padding: 30px;
-            width: 100%;
-            max-width: 500px;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(74, 144, 226, 0.2);
+            padding: 40px;
+            width: 80%; /* Chiều ngang 80% theo yêu cầu */
+            max-width: 1200px; /* Giới hạn tối đa để không quá loãng trên màn hình cực lớn */
+            min-width: 350px;
             text-align: center;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            border: 4px solid #E1EFFF;
+            gap: 25px;
+            border: 6px solid #E1EFFF;
+            transition: all 0.3s ease;
         }
 
         h1 {
             color: var(--primary);
             margin: 0;
-            font-size: 1.8em;
+            font-size: 2.2em;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
 
         .score-board {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
             background: #F8FBFF;
-            padding: 15px 20px;
-            border-radius: 15px;
-            border: 2px dashed #D0E4FF;
+            padding: 20px;
+            border-radius: 20px;
+            border: 3px dashed #D0E4FF;
         }
 
         .score-item {
-            font-size: 1.1em;
+            font-size: 1.4em;
             font-weight: 700;
         }
 
@@ -69,30 +71,31 @@
 
         .question-box {
             background: #FFF;
-            border-radius: 20px;
-            padding: 30px;
+            border-radius: 25px;
+            padding: 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
+            min-height: 250px;
+            border: 1px solid #F0F0F0;
         }
 
         .math-vertical {
             display: inline-flex;
             flex-direction: column;
             align-items: flex-end;
-            font-size: 3.5rem;
+            font-size: 5rem; /* Tăng kích thước số */
             font-weight: 700;
             color: #2D3436;
-            line-height: 1.2;
+            line-height: 1.1;
             font-variant-numeric: tabular-nums;
         }
 
         .math-row {
             display: flex;
             justify-content: flex-end;
-            min-width: 120px;
+            min-width: 180px;
         }
 
         .math-op-row {
@@ -104,38 +107,38 @@
 
         .operator {
             position: absolute;
-            left: -40px;
+            left: -60px;
             color: var(--secondary);
         }
 
         .math-line {
             width: 100%;
-            height: 4px;
+            height: 6px;
             background: #2D3436;
-            margin: 8px 0;
-            border-radius: 2px;
+            margin: 15px 0;
+            border-radius: 3px;
         }
 
         .input-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
 
         .answer-inputs {
             display: flex;
             justify-content: flex-end;
-            width: 120px; /* Khớp với độ rộng của math-vertical */
-            gap: 4px;
+            width: 180px; /* Khớp với độ rộng math-row mới */
+            gap: 10px;
         }
 
         .digit-input {
-            width: 55px;
-            height: 70px;
-            border: 3px solid #E0E0E0;
-            border-radius: 12px;
-            font-size: 2.5rem;
+            width: 80px;
+            height: 100px;
+            border: 4px solid #E0E0E0;
+            border-radius: 15px;
+            font-size: 3.5rem;
             text-align: center;
             font-family: inherit;
             font-weight: 700;
@@ -147,70 +150,72 @@
             outline: none;
             border-color: var(--primary);
             background: #F0F7FF;
-            box-shadow: 0 0 10px rgba(74, 144, 226, 0.2);
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
         }
 
         .controls {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             justify-content: center;
             width: 100%;
+            max-width: 400px;
         }
 
         .btn {
             flex: 1;
-            padding: 15px;
+            padding: 20px;
             border: none;
-            border-radius: 15px;
-            font-size: 1.1rem;
+            border-radius: 20px;
+            font-size: 1.3rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
             font-family: inherit;
+            text-transform: uppercase;
         }
 
         .btn-check {
             background: var(--primary);
             color: white;
-            box-shadow: 0 4px 0 #357ABD;
+            box-shadow: 0 6px 0 #357ABD;
         }
 
-        .btn-check:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #357ABD; }
-        .btn-check:active { transform: translateY(2px); box-shadow: 0 0 0 #357ABD; }
+        .btn-check:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #357ABD; }
+        .btn-check:active { transform: translateY(3px); box-shadow: 0 0 0 #357ABD; }
 
         .btn-next {
             background: var(--success);
             color: white;
-            box-shadow: 0 4px 0 #388E3C;
+            box-shadow: 0 6px 0 #388E3C;
         }
 
         #feedback {
-            height: 30px;
+            height: 40px;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
         }
 
         .road-section {
             width: 100%;
             background: #E1EFFF;
-            padding: 15px;
-            border-radius: 20px;
+            padding: 20px;
+            border-radius: 25px;
             box-sizing: border-box;
         }
 
         #roadCanvas {
             width: 100%;
-            height: 100px;
-            background: #555;
-            border-radius: 12px;
+            height: 120px;
+            background: #444;
+            border-radius: 15px;
             display: block;
         }
 
-        /* Popup */
         .popup {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: none;
             align-items: center;
             justify-content: center;
@@ -220,12 +225,12 @@
 
         .popup-card {
             background: white;
-            padding: 40px;
-            border-radius: 30px;
+            padding: 50px;
+            border-radius: 40px;
             text-align: center;
-            max-width: 400px;
+            max-width: 500px;
             width: 100%;
-            animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes zoomIn {
@@ -233,9 +238,12 @@
             to { transform: scale(1); opacity: 1; }
         }
 
-        @media (max-width: 400px) {
-            .math-vertical { font-size: 2.5rem; }
-            .digit-input { width: 45px; height: 60px; font-size: 2rem; }
+        @media (max-width: 768px) {
+            .game-container { width: 95%; padding: 20px; }
+            .math-vertical { font-size: 3.5rem; }
+            .digit-input { width: 60px; height: 80px; font-size: 2.5rem; }
+            .math-row, .answer-inputs { min-width: 130px; width: 130px; }
+            .operator { left: -35px; }
         }
     </style>
 </head>
@@ -274,8 +282,8 @@
 
     <div id="winPopup" class="popup">
         <div class="popup-card">
-            <h2 style="font-size: 2.5rem; margin: 0;">🎉 GIỎI QUÁ!</h2>
-            <p style="font-size: 1.2rem; color: #666; margin: 20px 0;">Bạn đã hoàn thành 30 câu hỏi và về đích an toàn!</p>
+            <h2 style="font-size: 3rem; margin: 0; color: var(--primary);">🎉 TUYỆT VỜI!</h2>
+            <p style="font-size: 1.5rem; color: #666; margin: 25px 0;">Bạn đã hoàn thành chặng đường xuất sắc!</p>
             <button onclick="location.reload()" class="btn btn-check" style="width: 100%">CHƠI LẠI</button>
         </div>
     </div>
@@ -391,49 +399,43 @@
 
         function drawRoad() {
             const w = roadCanvas.width = roadCanvas.offsetWidth;
-            const h = roadCanvas.height = 100;
+            const h = roadCanvas.height = 120;
             
-            // Road background
-            ctx.fillStyle = "#444";
+            ctx.fillStyle = "#333";
             ctx.fillRect(0, 0, w, h);
             
-            // Center line
             ctx.strokeStyle = "#FFF";
-            ctx.setLineDash([15, 15]);
-            ctx.lineWidth = 2;
+            ctx.setLineDash([20, 20]);
+            ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(0, h/2); ctx.lineTo(w, h/2);
             ctx.stroke();
 
-            // Markers
-            const padding = 40;
+            const padding = 60;
             const usableW = w - (padding * 2);
             for(let i=0; i<=state.target; i+=5) {
                 const x = padding + (i / state.target) * usableW;
                 ctx.fillStyle = i === state.target ? "#FFD700" : "#FFF";
                 ctx.beginPath();
-                ctx.arc(x, h/2, 4, 0, Math.PI*2);
+                ctx.arc(x, h/2, 6, 0, Math.PI*2);
                 ctx.fill();
-                ctx.fillStyle = "#AAA";
-                ctx.font = "bold 12px Lexend";
+                ctx.fillStyle = "#CCC";
+                ctx.font = "bold 14px Lexend";
                 ctx.textAlign = "center";
-                ctx.fillText(i === 0 ? "BĐ" : i, x, h - 10);
+                ctx.fillText(i === 0 ? "BẮT ĐẦU" : i, x, h - 15);
             }
 
-            // Player car (Emoji based)
             const playerX = padding + (state.correct / state.target) * usableW;
-            ctx.font = "30px Arial";
+            ctx.font = "45px Arial";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText("🏎️", playerX, h/2 - 5);
         }
 
-        // Auto-focus logic
         tensInp.addEventListener('input', (e) => {
             if (e.target.value.length >= 1) unitsInp.focus();
         });
 
-        // Event Listeners
         btnSubmit.onclick = check;
         btnNext.onclick = generateQuestion;
         
