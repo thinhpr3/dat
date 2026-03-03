@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò Chơi Học Toán Vui Nhộn</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --secondary: #FF6B6B;
+            --success: #4CAF50;
+            --bg: #F0F7FF;
+            --card-bg: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #333;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(74, 144, 226, 0.15);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border: 4px solid #E1EFFF;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin: 0;
+            font-size: 1.8em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            background: #F8FBFF;
+            padding: 15px 20px;
+            border-radius: 15px;
+            border: 2px dashed #D0E4FF;
+        }
+
+        .score-item {
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+
+        .score-correct { color: var(--success); }
+        .score-incorrect { color: var(--secondary); }
+
+        .question-box {
+            background: #FFF;
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .math-vertical {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #2D3436;
+            line-height: 1.2;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .math-row {
+            display: flex;
+            justify-content: flex-end;
+            min-width: 120px;
+        }
+
+        .math-op-row {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .operator {
+            position: absolute;
+            left: -40px;
+            color: var(--secondary);
+        }
+
+        .math-line {
+            width: 100%;
+            height: 4px;
+            background: #2D3436;
+            margin: 8px 0;
+            border-radius: 2px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .answer-inputs {
+            display: flex;
+            justify-content: flex-end;
+            width: 120px; /* Khớp với độ rộng của math-vertical */
+            gap: 4px;
+        }
+
+        .digit-input {
+            width: 55px;
+            height: 70px;
+            border: 3px solid #E0E0E0;
+            border-radius: 12px;
+            font-size: 2.5rem;
+            text-align: center;
+            font-family: inherit;
+            font-weight: 700;
+            color: var(--primary);
+            transition: all 0.2s;
+        }
+
+        .digit-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #F0F7FF;
+            box-shadow: 0 0 10px rgba(74, 144, 226, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-check {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 0 #357ABD;
+        }
+
+        .btn-check:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #357ABD; }
+        .btn-check:active { transform: translateY(2px); box-shadow: 0 0 0 #357ABD; }
+
+        .btn-next {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 4px 0 #388E3C;
+        }
+
+        #feedback {
+            height: 30px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .road-section {
+            width: 100%;
+            background: #E1EFFF;
+            padding: 15px;
+            border-radius: 20px;
+            box-sizing: border-box;
+        }
+
+        #roadCanvas {
+            width: 100%;
+            height: 100px;
+            background: #555;
+            border-radius: 12px;
+            display: block;
+        }
+
+        /* Popup */
+        .popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .popup-card {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 400px) {
+            .math-vertical { font-size: 2.5rem; }
+            .digit-input { width: 45px; height: 60px; font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Thử Thách Toán Học</h1>
+
+        <div class="score-board">
+            <div class="score-item score-correct">Đúng: <span id="correctVal">0</span>/30</div>
+            <div class="score-item score-incorrect">Sai: <span id="incorrectVal">0</span></div>
+        </div>
+
+        <div class="question-box">
+            <div id="mathDisplay" class="math-vertical">
+                <!-- Phép tính render ở đây -->
+            </div>
+        </div>
+
+        <div class="input-wrapper">
+            <div class="answer-inputs">
+                <input type="text" id="tens" class="digit-input" maxlength="1" inputmode="numeric">
+                <input type="text" id="units" class="digit-input" maxlength="1" inputmode="numeric">
+            </div>
+            <div id="feedback"></div>
+            <div class="controls">
+                <button id="btnSubmit" class="btn btn-check">KIỂM TRA</button>
+                <button id="btnNext" class="btn btn-next" style="display: none;">TIẾP TỤC ➔</button>
+            </div>
+        </div>
+
+        <div class="road-section">
+            <canvas id="roadCanvas"></canvas>
+        </div>
+    </div>
+
+    <div id="winPopup" class="popup">
+        <div class="popup-card">
+            <h2 style="font-size: 2.5rem; margin: 0;">🎉 GIỎI QUÁ!</h2>
+            <p style="font-size: 1.2rem; color: #666; margin: 20px 0;">Bạn đã hoàn thành 30 câu hỏi và về đích an toàn!</p>
+            <button onclick="location.reload()" class="btn btn-check" style="width: 100%">CHƠI LẠI</button>
+        </div>
+    </div>
+
+    <script>
+        const mathDisplay = document.getElementById('mathDisplay');
+        const tensInp = document.getElementById('tens');
+        const unitsInp = document.getElementById('units');
+        const feedback = document.getElementById('feedback');
+        const correctText = document.getElementById('correctVal');
+        const incorrectText = document.getElementById('incorrectVal');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const btnNext = document.getElementById('btnNext');
+        const roadCanvas = document.getElementById('roadCanvas');
+        const ctx = roadCanvas.getContext('2d');
+
+        let state = {
+            correct: 0,
+            incorrect: 0,
+            target: 30,
+            currentAns: 0
+        };
+
+        function getRandom(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateQuestion() {
+            const types = ['add_carry', 'sub_borrow', 'add_simple', 'sub_simple', 'mul2', 'mul5', 'div2', 'div5'];
+            const type = types[getRandom(0, types.length - 1)];
+            let n1, n2, op, ans;
+
+            switch(type) {
+                case 'add_carry':
+                    n1 = getRandom(11, 79); 
+                    n2 = getRandom(11, 89 - n1);
+                    while((n1%10) + (n2%10) < 10) { n2 = getRandom(11, 89-n1); }
+                    op = '+'; ans = n1 + n2; break;
+                case 'sub_borrow':
+                    n1 = getRandom(21, 98);
+                    n2 = getRandom(11, n1 - 1);
+                    while((n1%10) >= (n2%10)) { n2 = getRandom(11, n1-1); }
+                    op = '-'; ans = n1 - n2; break;
+                case 'mul2':
+                    n1 = 2; n2 = getRandom(1, 9); op = '×'; ans = n1 * n2; break;
+                case 'mul5':
+                    n1 = 5; n2 = getRandom(1, 9); op = '×'; ans = n1 * n2; break;
+                case 'div2':
+                    ans = getRandom(1, 9); n2 = 2; n1 = ans * n2; op = '÷'; break;
+                case 'div5':
+                    ans = getRandom(1, 9); n2 = 5; n1 = ans * n2; op = '÷'; break;
+                case 'add_simple':
+                    n1 = getRandom(11, 70); n2 = getRandom(11, 20);
+                    while((n1%10) + (n2%10) >= 10) { n2 = getRandom(11, 20); }
+                    op = '+'; ans = n1 + n2; break;
+                default: // sub_simple
+                    n1 = getRandom(21, 99); n2 = getRandom(11, 20);
+                    while((n1%10) < (n2%10)) { n2 = getRandom(11, 20); }
+                    op = '-'; ans = n1 - n2;
+            }
+
+            state.currentAns = ans;
+            renderQuestion(n1, n2, op);
+        }
+
+        function renderQuestion(n1, n2, op) {
+            const s1 = n1.toString();
+            const s2 = n2.toString();
+            
+            mathDisplay.innerHTML = `
+                <div class="math-row">${s1}</div>
+                <div class="math-op-row">
+                    <span class="operator">${op}</span>
+                    <span>${s2}</span>
+                </div>
+                <div class="math-line"></div>
+            `;
+            
+            tensInp.value = '';
+            unitsInp.value = '';
+            tensInp.disabled = false;
+            unitsInp.disabled = false;
+            tensInp.focus();
+            feedback.textContent = '';
+            btnSubmit.style.display = 'block';
+            btnNext.style.display = 'none';
+        }
+
+        function check() {
+            const val = (tensInp.value || "0") + (unitsInp.value || "0");
+            const userAns = parseInt(val);
+
+            if (userAns === state.currentAns) {
+                state.correct++;
+                feedback.innerHTML = '<span style="color: var(--success)">Chính xác! ✨</span>';
+                if (state.correct >= state.target) {
+                    document.getElementById('winPopup').style.display = 'flex';
+                }
+            } else {
+                state.incorrect++;
+                feedback.innerHTML = `<span style="color: var(--secondary)">Sai rồi! Đáp án là ${state.currentAns}</span>`;
+            }
+
+            correctText.textContent = state.correct;
+            incorrectText.textContent = state.incorrect;
+            
+            tensInp.disabled = true;
+            unitsInp.disabled = true;
+            btnSubmit.style.display = 'none';
+            btnNext.style.display = 'block';
+            drawRoad();
+        }
+
+        function drawRoad() {
+            const w = roadCanvas.width = roadCanvas.offsetWidth;
+            const h = roadCanvas.height = 100;
+            
+            // Road background
+            ctx.fillStyle = "#444";
+            ctx.fillRect(0, 0, w, h);
+            
+            // Center line
+            ctx.strokeStyle = "#FFF";
+            ctx.setLineDash([15, 15]);
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, h/2); ctx.lineTo(w, h/2);
+            ctx.stroke();
+
+            // Markers
+            const padding = 40;
+            const usableW = w - (padding * 2);
+            for(let i=0; i<=state.target; i+=5) {
+                const x = padding + (i / state.target) * usableW;
+                ctx.fillStyle = i === state.target ? "#FFD700" : "#FFF";
+                ctx.beginPath();
+                ctx.arc(x, h/2, 4, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#AAA";
+                ctx.font = "bold 12px Lexend";
+                ctx.textAlign = "center";
+                ctx.fillText(i === 0 ? "BĐ" : i, x, h - 10);
+            }
+
+            // Player car (Emoji based)
+            const playerX = padding + (state.correct / state.target) * usableW;
+            ctx.font = "30px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("🏎️", playerX, h/2 - 5);
+        }
+
+        // Auto-focus logic
+        tensInp.addEventListener('input', (e) => {
+            if (e.target.value.length >= 1) unitsInp.focus();
+        });
+
+        // Event Listeners
+        btnSubmit.onclick = check;
+        btnNext.onclick = generateQuestion;
+        
+        window.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                if (btnSubmit.style.display !== 'none') check();
+                else if (btnNext.style.display !== 'none') generateQuestion();
+            }
+        };
+
+        window.onload = () => {
+            generateQuestion();
+            drawRoad();
+            window.onresize = drawRoad;
+        };
+    </script>
+</body>
+</html>
