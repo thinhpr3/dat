@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bé Học Xem Đồng Hồ - Thử Thách 24 Giờ</title>
+    <title>Học Xem Đồng Hồ - Thử Thách 24 Giờ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -76,7 +76,7 @@
         </div>
 
         <div id="question-area" class="bg-blue-50 p-4 rounded-2xl border-2 border-blue-200 mb-6">
-            <p class="text-gray-600 font-bold uppercase tracking-wider text-xs mb-1">Câu hỏi dành cho bé:</p>
+            <p class="text-gray-600 font-bold uppercase tracking-wider text-xs mb-1">Câu về giờ - phút:</p>
             <div id="target-time-text" class="text-3xl font-black text-blue-700">--:--</div>
             <!-- Dòng gợi ý: Mặc định ẩn, chỉ hiện khi sai -->
             <p id="hint-text" class="text-sm text-orange-600 mt-2 font-medium italic min-h-[1.25rem] opacity-0 transition-opacity duration-300"></p>
@@ -120,7 +120,7 @@
         <div>
             <div class="text-8xl mb-4">🏆</div>
             <h2 class="text-4xl font-black mb-2">XUẤT SẮC!</h2>
-            <p class="text-xl mb-8">Bé đã hoàn thành chặng đường 20 câu hỏi!</p>
+            <p class="text-xl mb-8">Chúc mừng bạn đã hoàn thành chặng đường 20 câu hỏi!</p>
             <button onclick="location.reload()" class="bg-white text-blue-600 font-bold py-4 px-10 rounded-full text-xl shadow-xl">CHƠI LẠI TỪ ĐẦU</button>
         </div>
     </div>
@@ -276,7 +276,7 @@
                     hintDisplay.textContent = `💡 Mẹo: Lấy ${targetHourRaw} trừ 12 để tìm số trên đồng hồ nhé!`;
                     hintDisplay.classList.remove('opacity-0');
                 } else {
-                    hintDisplay.textContent = "💡 Bé kiểm tra lại vị trí các kim nhé!";
+                    hintDisplay.textContent = "💡 Kiểm tra lại vị trí các kim nhé!";
                     hintDisplay.classList.remove('opacity-0');
                 }
             }
