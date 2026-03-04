@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thử Tài Toán Học Lớp 2</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap');
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .game-board {
+            background-color: #ffffff;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 25px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Thanh tiến trình */
+        .progress-container {
+            width: 100%;
+            background-color: #f1f2f6;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            height: 20px;
+            border: 2px solid #dfe4ea;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .status {
+            font-size: 1.2em;
+            color: #2f3542;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Vùng câu hỏi */
+        .question-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5em;
+            color: #2ed573;
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            margin-right: 15px;
+            font-weight: 800;
+        }
+
+        input[type="number"] {
+            width: 120px;
+            height: 80px;
+            font-size: 1em;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            text-align: center;
+            border: 4px solid #ff4757;
+            border-radius: 15px;
+            color: #ff4757;
+            outline: none;
+            transition: all 0.3s;
+            background-color: #f8f9fa;
+        }
+
+        input[type="number"]:focus {
+            border-color: #ffa502;
+            box-shadow: 0 0 15px rgba(255, 165, 2, 0.4);
+        }
+
+        /* Ẩn mũi tên của input number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
+        .btn-check {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5em;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(255, 71, 87, 0.4);
+            transition: all 0.2s;
+        }
+
+        .btn-check:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(255, 71, 87, 0.6);
+        }
+
+        .btn-check:active {
+            transform: translateY(2px);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            min-height: 35px;
+        }
+
+        /* Animation khi sai */
+        .shake {
+            animation: shake 0.5s;
+            border-color: #ff4757 !important;
+            background-color: #ffcccc !important;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Màn hình chúc mừng */
+        .congratulations {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .congratulations h2 {
+            font-size: 2.5em;
+            color: #ff9f43;
+            margin-bottom: 10px;
+        }
+
+        .congratulations p {
+            font-size: 1.3em;
+            color: #576574;
+            margin-bottom: 30px;
+        }
+
+        .btn-restart {
+            background-color: #2ed573;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(46, 213, 115, 0.4);
+        }
+
+        .confetti {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-board">
+        <!-- Khu vực làm bài -->
+        <div id="quiz-area">
+            <h1>Thử Tài Toán Học</h1>
+            
+            <div class="status">Câu hỏi: <span id="current-q">1</span> / 30</div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="question-area">
+                <div class="question-text" id="question-text">5 + 5 =</div>
+                <input type="number" id="answer-input" autocomplete="off" autofocus>
+            </div>
+
+            <button class="btn-check" onclick="checkAnswer()">Kiểm tra</button>
+
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <!-- Màn hình hoàn thành -->
+        <div class="congratulations" id="congratulations">
+            <div class="confetti">🎉🏆🎉</div>
+            <h2>Tuyệt Vời Quá!</h2>
+            <p>Con đã hoàn thành xuất sắc 30 câu hỏi!</p>
+            <button class="btn-restart" onclick="startGame()">Chơi lại nhé</button>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_QUESTIONS = 30;
+        let questions =[];
+        let currentIndex = 0;
+
+        // --- CÁC HÀM TẠO PHÉP TOÁN NGẪU NHIÊN ---
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateQuestions() {
+            let qList =[];
+
+            // 1. Cộng không nhớ (vd: 23 + 14)
+            for(let i=0; i<6; i++) {
+                let a, b;
+                do {
+                    a = randomInt(10, 89);
+                    b = randomInt(1, 99 - a);
+                } while ((a % 10) + (b % 10) >= 10);
+                qList.push({ text: `${a} + ${b} =`, ans: a + b });
+            }
+
+            // 2. Cộng có nhớ (vd: 35 + 28)
+            for(let i=0; i<6; i++) {
+                let a, b;
+                do {
+                    a = randomInt(10, 89);
+                    b = randomInt(1, 99 - a);
+                } while ((a % 10) + (b % 10) < 10);
+                qList.push({ text: `${a} + ${b} =`, ans: a + b });
+            }
+
+            // 3. Trừ không nhớ (vd: 48 - 25)
+            for(let i=0; i<6; i++) {
+                let a, b;
+                do {
+                    a = randomInt(20, 99);
+                    b = randomInt(10, a - 1);
+                } while ((a % 10) < (b % 10));
+                qList.push({ text: `${a} - ${b} =`, ans: a - b });
+            }
+
+            // 4. Trừ có nhớ (vd: 52 - 17)
+            for(let i=0; i<6; i++) {
+                let a, b;
+                do {
+                    a = randomInt(20, 99);
+                    b = randomInt(10, a - 1);
+                } while ((a % 10) >= (b % 10));
+                qList.push({ text: `${a} - ${b} =`, ans: a - b });
+            }
+
+            // 5. Nhân 2 và 5
+            for(let i=0; i<3; i++) {
+                let op = Math.random() < 0.5 ? 2 : 5;
+                let num = randomInt(1, 10);
+                qList.push({ text: `${num} × ${op} =`, ans: num * op });
+            }
+
+            // 6. Chia 2 và 5
+            for(let i=0; i<3; i++) {
+                let op = Math.random() < 0.5 ? 2 : 5;
+                let num = randomInt(1, 10);
+                let dividend = num * op;
+                qList.push({ text: `${dividend} ÷ ${op} =`, ans: num });
+            }
+
+            // Đảo lộn ngẫu nhiên mảng câu hỏi
+            return qList.sort(() => Math.random() - 0.5);
+        }
+
+        // --- LOGIC GIAO DIỆN ---
+        const uiQuizArea = document.getElementById('quiz-area');
+        const uiCongrats = document.getElementById('congratulations');
+        const uiQuestionText = document.getElementById('question-text');
+        const uiAnswerInput = document.getElementById('answer-input');
+        const uiCurrentQ = document.getElementById('current-q');
+        const uiProgressBar = document.getElementById('progress-bar');
+        const uiFeedback = document.getElementById('feedback');
+
+        function startGame() {
+            questions = generateQuestions();
+            currentIndex = 0;
+            uiQuizArea.style.display = 'block';
+            uiCongrats.style.display = 'none';
+            uiFeedback.innerHTML = "";
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            let q = questions[currentIndex];
+            uiQuestionText.innerText = q.text;
+            uiAnswerInput.value = '';
+            uiAnswerInput.focus();
+            
+            // Cập nhật thanh tiến trình
+            uiCurrentQ.innerText = currentIndex + 1;
+            let percent = (currentIndex / TOTAL_QUESTIONS) * 100;
+            uiProgressBar.style.width = percent + '%';
+        }
+
+        function checkAnswer() {
+            let userAnswer = parseInt(uiAnswerInput.value);
+            let correctAnswer = questions[currentIndex].ans;
+
+            if (isNaN(userAnswer)) {
+                uiFeedback.style.color = "#ff4757";
+                uiFeedback.innerText = "Con hãy nhập số nhé!";
+                shakeInput();
+                return;
+            }
+
+            if (userAnswer === correctAnswer) {
+                // Trả lời đúng
+                uiFeedback.style.color = "#2ed573";
+                uiFeedback.innerText = "⭐ Chính xác! Giỏi quá! ⭐";
+                uiAnswerInput.style.backgroundColor = "#e8f8f5";
+                
+                // Tự động chuyển câu sau 1 giây
+                setTimeout(() => {
+                    uiAnswerInput.style.backgroundColor = "#f8f9fa";
+                    uiFeedback.innerText = "";
+                    currentIndex++;
+                    
+                    if (currentIndex < TOTAL_QUESTIONS) {
+                        loadQuestion();
+                    } else {
+                        showCongratulations();
+                    }
+                }, 1000);
+
+            } else {
+                // Trả lời sai
+                uiFeedback.style.color = "#ff4757";
+                uiFeedback.innerText = "Chưa đúng rồi, con thử tính lại nhé!";
+                shakeInput();
+                uiAnswerInput.value = '';
+                uiAnswerInput.focus();
+            }
+        }
+
+        function shakeInput() {
+            uiAnswerInput.classList.add('shake');
+            setTimeout(() => {
+                uiAnswerInput.classList.remove('shake');
+            }, 500);
+        }
+
+        function showCongratulations() {
+            uiQuizArea.style.display = 'none';
+            uiCongrats.style.display = 'flex';
+            uiProgressBar.style.width = '100%';
+        }
+
+        // Hỗ trợ ấn phím Enter để kiểm tra
+        uiAnswerInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                checkAnswer();
+            }
+        });
+
+        // Bắt đầu game khi tải trang
+        window.onload = startGame;
+    </script>
+</body>
+</html>
