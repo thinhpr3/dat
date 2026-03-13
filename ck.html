@@ -31,12 +31,23 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
         }
+        .tab-active {
+            border-bottom: 3px solid #374151;
+            color: #111827;
+            font-weight: 800;
+        }
     </style>
 </head>
 <body class="p-4">
 
     <div class="max-w-md mx-auto">
-        <!-- Vùng hiển thị tổng số -->
+        <!-- Tabs -->
+        <div class="flex mb-4 bg-white rounded-xl shadow-sm overflow-hidden">
+            <button id="tabCS" onclick="switchTab('CS')" class="flex-1 py-3 text-sm font-bold text-gray-400 transition-all tab-active">LOẠI 1</button>
+            <button id="tabPS" onclick="switchTab('PS')" class="flex-1 py-3 text-sm font-bold text-gray-400 transition-all">LOẠI 2</button>
+        </div>
+
+        <!-- Vùng hiển thị vốn thực tế -->
         <div class="card p-4 mb-4 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg text-center">
             <div id="displayTotal" class="text-2xl font-black">0</div>
         </div>
@@ -74,25 +85,47 @@
         </div>
 
         <!-- Bảng hiển thị kết quả -->
-        <div id="outputArea" class="result-grid">
-            <!-- Dữ liệu được nạp tại đây -->
-        </div>
+        <div id="outputArea" class="result-grid"></div>
     </div>
 
     <script>
         const fields = ['inputA', 'inputB', 'inputC', 'inputD', 'inputE'];
+        let currentTab = 'CS';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tabCS').classList.toggle('tab-active', tab === 'CS');
+            document.getElementById('tabPS').classList.toggle('tab-active', tab === 'PS');
+
+            if (tab === 'CS') {
+                document.getElementById('inputA').value = "30.00";
+                document.getElementById('inputA').step = "0.05";
+                document.getElementById('inputB').value = "1000";
+                document.getElementById('inputC').value = "0.05";
+                document.getElementById('inputC').step = "0.05";
+            } else {
+                document.getElementById('inputA').value = "1840.0";
+                document.getElementById('inputA').step = "0.1";
+                document.getElementById('inputB').value = "3";
+                document.getElementById('inputC').value = "1.0";
+                document.getElementById('inputC').step = "0.1";
+            }
+            
+            loadData();
+            calculate();
+        }
 
         function saveAndCalculate() {
             const data = {};
             fields.forEach(id => {
                 data[id] = document.getElementById(id).value;
             });
-            localStorage.setItem('generic_calc_data', JSON.stringify(data));
+            localStorage.setItem(`data_${currentTab}`, JSON.stringify(data));
             calculate();
         }
 
         function loadData() {
-            const savedData = localStorage.getItem('generic_calc_data');
+            const savedData = localStorage.getItem(`data_${currentTab}`);
             if (savedData) {
                 const data = JSON.parse(savedData);
                 fields.forEach(id => {
@@ -114,43 +147,59 @@
             const displayTotal = document.getElementById('displayTotal');
             outputArea.innerHTML = '';
 
-            // Logic tính toán cơ bản (đã ẩn danh nhãn)
-            const baseTotal = (valA * 1000) * valB * (1 + 0.0003);
-            displayTotal.innerText = format(Math.round(baseTotal));
+            let realCapital = 0; // Vốn thực tế để hiển thị ở ô trên cùng
+
+            if (currentTab === 'CS') {
+                // Cơ sở: Vốn = Giá mua * SL * (1 + phí 0.03%)
+                realCapital = (valA * 1000) * valB * (1 + 0.0003);
+            } else {
+                // Phái sinh: Vốn thực tế = 121tr cho 3 HĐ -> 40,333,333đ mỗi hợp đồng
+                const marginPerContract = 121000000 / 3; 
+                realCapital = valB * marginPerContract;
+            }
+            
+            displayTotal.innerText = format(Math.round(realCapital));
 
             for (let i = 1; i <= valD; i++) {
-                let shift;
-                let finalVal;
-                if (valE === 'up') {
-                    shift = i * valC;
-                    finalVal = valA + shift;
-                } else {
-                    shift = -(i * valC);
-                    finalVal = valA + shift;
-                }
-
+                let shift = (valE === 'up' ? i * valC : -(i * valC));
+                let finalVal = valA + shift;
                 if (finalVal <= 0) break;
 
-                const resultA = (finalVal * 1000) * valB * (1 - 0.0013);
-                const resultB = resultA - baseTotal;
-                const resultC = (resultB / (valA * 1000 * valB)) * 100;
+                let resultNet = 0;
+                let resultPct = 0;
+
+                if (currentTab === 'CS') {
+                    const totalSell = (finalVal * 1000) * valB * (1 - 0.0013);
+                    resultNet = totalSell - realCapital;
+                    resultPct = (resultNet / (valA * 1000 * valB)) * 100;
+                } else {
+                    // Phái sinh: Chênh lệch điểm * 100,000 * số hợp đồng
+                    const pointDiff = finalVal - valA;
+                    const totalProfitBeforeFee = pointDiff * 100000 * valB;
+                    const totalFees = valB * 40000; // Phí trọn gói 0.4 điểm
+                    
+                    resultNet = totalProfitBeforeFee - totalFees;
+                    
+                    // Tính % trên số vốn thực tế hiển thị ở trên
+                    resultPct = (resultNet / realCapital) * 100;
+                }
 
                 const item = document.createElement('div');
                 item.className = 'card p-3 flex justify-between items-center border-l-4 ' + 
-                                (resultB > 0 ? 'border-emerald-500' : 'border-red-500');
+                                (resultNet > 0 ? 'border-emerald-500' : 'border-red-500');
                 
-                let color = resultB > 0 ? 'val-pos' : (resultB < 0 ? 'val-neg' : 'val-neutral');
-                let sign = resultB > 0 ? '+' : '';
+                let color = resultNet > 0 ? 'val-pos' : (resultNet < 0 ? 'val-neg' : 'val-neutral');
+                let sign = resultNet > 0 ? '+' : '';
                 let shiftSign = shift > 0 ? '+' : '';
 
                 item.innerHTML = `
                     <div class="flex flex-col pr-1">
-                        <span class="text-base font-black text-gray-800 leading-tight">${finalVal.toFixed(2)}</span>
-                        <span class="text-[10px] font-bold ${color}">${shiftSign}${shift.toFixed(2)}</span>
+                        <span class="text-base font-black text-gray-800 leading-tight">${finalVal.toFixed(currentTab === 'CS' ? 2 : 1)}</span>
+                        <span class="text-[10px] font-bold ${color}">${shiftSign}${shift.toFixed(currentTab === 'CS' ? 2 : 1)}</span>
                     </div>
                     <div class="text-right">
-                        <div class="text-[13px] font-black ${color} leading-tight">${sign}${format(Math.round(resultB))}</div>
-                        <div class="text-[11px] font-bold ${color}">${sign}${resultC.toFixed(1)}%</div>
+                        <div class="text-[13px] font-black ${color} leading-tight">${sign}${format(Math.round(resultNet))}</div>
+                        <div class="text-[11px] font-bold ${color}">${sign}${resultPct.toFixed(2)}%</div>
                     </div>
                 `;
                 outputArea.appendChild(item);
@@ -162,8 +211,7 @@
         }
 
         window.onload = function() {
-            loadData();
-            calculate();
+            switchTab('CS');
         };
     </script>
 </body>
