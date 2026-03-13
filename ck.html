@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hệ Số Biến Thiên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        input, select {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 8px;
+            width: 100%;
+            font-size: 16px; 
+        }
+        .val-pos { color: #10b981; } 
+        .val-neg { color: #ef4444; } 
+        .val-neutral { color: #6b7280; } 
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="max-w-md mx-auto">
+        <!-- Vùng hiển thị tổng số -->
+        <div class="card p-4 mb-4 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg text-center">
+            <div id="displayTotal" class="text-2xl font-black">0</div>
+        </div>
+
+        <!-- Section nhập liệu -->
+        <div class="card p-4 mb-4">
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Giá trị gốc</label>
+                    <input type="number" id="inputA" value="30.00" step="0.05" oninput="saveAndCalculate()">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Định mức</label>
+                    <input type="number" id="inputB" value="1000" step="100" oninput="saveAndCalculate()">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Độ lệch</label>
+                    <input type="number" id="inputC" value="0.05" step="0.05" oninput="saveAndCalculate()">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Giới hạn</label>
+                    <input type="number" id="inputD" value="10" step="1" oninput="saveAndCalculate()">
+                </div>
+            </div>
+
+            <div>
+                <select id="inputE" onchange="saveAndCalculate()">
+                    <option value="up">Tăng</option>
+                    <option value="down">Giảm</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Bảng hiển thị kết quả -->
+        <div id="outputArea" class="result-grid">
+            <!-- Dữ liệu được nạp tại đây -->
+        </div>
+    </div>
+
+    <script>
+        const fields = ['inputA', 'inputB', 'inputC', 'inputD', 'inputE'];
+
+        function saveAndCalculate() {
+            const data = {};
+            fields.forEach(id => {
+                data[id] = document.getElementById(id).value;
+            });
+            localStorage.setItem('generic_calc_data', JSON.stringify(data));
+            calculate();
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('generic_calc_data');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                fields.forEach(id => {
+                    if (data[id] !== undefined) {
+                        document.getElementById(id).value = data[id];
+                    }
+                });
+            }
+        }
+
+        function calculate() {
+            const valA = parseFloat(document.getElementById('inputA').value) || 0;
+            const valB = parseInt(document.getElementById('inputB').value) || 0;
+            const valC = parseFloat(document.getElementById('inputC').value) || 0.05;
+            const valD = parseInt(document.getElementById('inputD').value) || 10;
+            const valE = document.getElementById('inputE').value;
+
+            const outputArea = document.getElementById('outputArea');
+            const displayTotal = document.getElementById('displayTotal');
+            outputArea.innerHTML = '';
+
+            // Logic tính toán cơ bản (đã ẩn danh nhãn)
+            const baseTotal = (valA * 1000) * valB * (1 + 0.0003);
+            displayTotal.innerText = format(Math.round(baseTotal));
+
+            for (let i = 1; i <= valD; i++) {
+                let shift;
+                let finalVal;
+                if (valE === 'up') {
+                    shift = i * valC;
+                    finalVal = valA + shift;
+                } else {
+                    shift = -(i * valC);
+                    finalVal = valA + shift;
+                }
+
+                if (finalVal <= 0) break;
+
+                const resultA = (finalVal * 1000) * valB * (1 - 0.0013);
+                const resultB = resultA - baseTotal;
+                const resultC = (resultB / (valA * 1000 * valB)) * 100;
+
+                const item = document.createElement('div');
+                item.className = 'card p-3 flex justify-between items-center border-l-4 ' + 
+                                (resultB > 0 ? 'border-emerald-500' : 'border-red-500');
+                
+                let color = resultB > 0 ? 'val-pos' : (resultB < 0 ? 'val-neg' : 'val-neutral');
+                let sign = resultB > 0 ? '+' : '';
+                let shiftSign = shift > 0 ? '+' : '';
+
+                item.innerHTML = `
+                    <div class="flex flex-col pr-1">
+                        <span class="text-base font-black text-gray-800 leading-tight">${finalVal.toFixed(2)}</span>
+                        <span class="text-[10px] font-bold ${color}">${shiftSign}${shift.toFixed(2)}</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[13px] font-black ${color} leading-tight">${sign}${format(Math.round(resultB))}</div>
+                        <div class="text-[11px] font-bold ${color}">${sign}${resultC.toFixed(1)}%</div>
+                    </div>
+                `;
+                outputArea.appendChild(item);
+            }
+        }
+
+        function format(n) {
+            return n.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+        }
+
+        window.onload = function() {
+            loadData();
+            calculate();
+        };
+    </script>
+</body>
+</html>
